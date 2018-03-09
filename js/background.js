@@ -63,10 +63,6 @@ var background = {
         });
     },
 
-    displayWarning: function() {
-
-    },
-
     isWhitelisted: function(url) {
         for(var i=0; i<background.whitelist.length; i++) {
             var wlDomain = background.whitelist[i];
