@@ -40,7 +40,7 @@ var contentScript = {
                     '<p>This site is known to be stealing username and password from Steemit users.</p>' +
                     '<p>Click on the back button on your browser or close this browser tab or window to return to safety</p>' +
                     '<p><a href="javascript:void(null)" onclick="document.getElementById(\'steemedphishwarning\').style.display=\'none\';"' +
-                    'style="color: yellow">Close</a></p></div>';
+                    'style="color: yellow">Dismiss this message</a></p></div>';
                 document.body.appendChild(div);
             },
 
