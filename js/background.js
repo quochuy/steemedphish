@@ -1,5 +1,6 @@
 var background = {
-    currentUrl: '',
+    alertMessage: 'Steemed Phish Alert\n\nOne of your browser tabs has landed on a Steemit SCAM website: ',
+
     whitelist: [
         "https://steemit.com/",
         "https://busy.org/",
@@ -24,10 +25,11 @@ var background = {
         "steemil.com"
     ],
 
+    alertDisplayed: false,
+
     init: function() {
         chrome.tabs.onActivated.addListener(function(info){
             chrome.tabs.get(info.tabId, function(change){
-                background.currentUrl = change.url;
                 var isWhitelisted = background.isWhitelisted(change.url);
                 if(isWhitelisted){
                     chrome.browserAction.setIcon({path: '../images/icon.png', tabId: info.tabId});
@@ -36,8 +38,7 @@ var background = {
 
                     var isBlacklisted = background.isBlackListed(change.url);
                     if (isBlacklisted) {
-
-                        alert("Steemed Phish Alert\n\nThis website is blacklisted and marked as a Steemit SCAM!");
+                        alert(background.alertMessage + change.url);
                     }
                 }
             });
@@ -48,16 +49,19 @@ var background = {
                 return;
             }
 
-            background.currentUrl = tab.url;
             var isWhitelisted = background.isWhitelisted(tab.url);
             if(isWhitelisted){
                 chrome.browserAction.setIcon({path: '../images/icon.png', tabId: tabId});
             } else {
                 chrome.browserAction.setIcon({path: '../images/icon-red.png', tabId: tabId});
 
-                var isBlacklisted = background.isBlackListed(change.url);
-                if (isBlacklisted) {
-                    alert("Steemed Phish Alert\n\nThis website is blacklisted and marked as a Steemit SCAM!");
+                var isBlacklisted = background.isBlackListed(tab.url);
+                if (isBlacklisted && background.alertDisplayed === false) {
+                    background.alertDisplayed = true;
+                    alert(background.alertMessage + tab.url);
+                    setTimeout(function() {
+                        background.alertDisplayed = false;
+                    }, 15000);
                 }
             }
         });

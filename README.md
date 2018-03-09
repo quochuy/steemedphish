@@ -1,5 +1,9 @@
 # steemedphish
 
+## v0.0.7
+- added a popup screen when you click on the extension icon info on how to contact me for reporting new scams
+- fixed the full page red warning panel to display for steewit.com
+
 ## v0.0.6
 - A content script is also injected into blacklisted websites and covers the age with a red warning panel. This does not work for all sites such as steewit.com.
 

@@ -1,3 +1,5 @@
+console.log('contentscript');
+
 var contentScript = {
     textarea: null,
     pageDataUpdateTimer: 0,
@@ -24,8 +26,6 @@ var contentScript = {
                     for(var i=0; i< anchors.length; i++) {
                         var anchor = anchors[i];
                         anchor.addEventListener('click', function(e) {
-
-
                             var target = e.target;
                             if (target.href && target.href !== '' && target.href.indexOf('https://' + host) === -1) {
                                 var response = confirm(

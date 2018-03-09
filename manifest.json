@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Steemed Phish",
     "description": "A Chrome extension that will warn you if you are being lured into a fake Steemit website.",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "permissions": [
         "tabs",
@@ -11,7 +11,8 @@
         "contextMenus"
     ],
     "browser_action": {
-        "default_icon": "images/icon-red.png"
+        "default_icon": "images/icon-red.png",
+        "default_popup": "popup.html"
     },
     "background": {
         "scripts": [
@@ -22,15 +23,15 @@
         {
             "run_at": "document_end",
             "matches": [
-                "https://steemit.com/*",
-                "https://busy.org/*",
-                "https://beta.chainbb.com/*",
-                "https://steemitstage.com/*",
-                "https://mspsteem.com/*",
-                "https://utopian.io/*",
-                "https://d.tube/*",
-                "https://dsound.audio/*",
-                "https://steemtools.com/*"
+                "*://steemit.com/*",
+                "*://busy.org/*",
+                "*://beta.chainbb.com/*",
+                "*://steemitstage.com/*",
+                "*://mspsteem.com/*",
+                "*://utopian.io/*",
+                "*://d.tube/*",
+                "*://dsound.audio/*",
+                "*://steemtools.com/*"
             ],
             "js": [
                 "js/content.js"
@@ -40,8 +41,8 @@
         {
             "run_at": "document_end",
             "matches": [
-                "https://steemil.com/*",
-                "https://steewit.com/*"
+                "*://steemil.com/*",
+                "*://steewit.com/*"
             ],
             "js": [
                 "js/content-blacklist.js"
