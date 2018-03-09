@@ -1,5 +1,3 @@
-console.log('contentscript');
-
 var contentScript = {
     textarea: null,
     pageDataUpdateTimer: 0,
