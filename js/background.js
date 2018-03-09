@@ -36,6 +36,7 @@ var background = {
 
                     var isBlacklisted = background.isBlackListed(change.url);
                     if (isBlacklisted) {
+
                         alert("Steemed Phish Alert\n\nThis website is blacklisted and marked as a Steemit SCAM!");
                     }
                 }
@@ -60,6 +61,10 @@ var background = {
                 }
             }
         });
+    },
+
+    displayWarning: function() {
+
     },
 
     isWhitelisted: function(url) {

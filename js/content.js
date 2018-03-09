@@ -45,7 +45,7 @@ var contentScript = {
                         });
                     }
                 }, 2000);
-            },
+            }
         }
 
         contentObject.init();
