@@ -4,59 +4,72 @@ var contentScript = {
     devtoolsPanelReady: false,
 
     init: function () {
-        contentScript.log('Injecting the content script...');
+        console.log('Steemed Phish: Injecting the content script...');
 
         var script = document.createElement('script');
         script.appendChild(document.createTextNode('(' + contentScript.inject + ')();'));
         document.body.appendChild(script);
-        
-        contentScript.log('Done.');
     },
 
     inject: function () {
         var contentObject = {
-            init: function () {
-                var url = window.location.href,
-                    host = window.location.host;
+            blacklist: [
+                "steewit.com",
+                "steemil.com"
+            ],
 
-                window.setTimeout(function() {
-                    var anchors = document.getElementsByTagName('a');
-                    for(var i=0; i< anchors.length; i++) {
-                        var anchor = anchors[i];
-                        anchor.addEventListener('click', function(e) {
-                            var target = e.target;
-                            if (target.href && target.href !== '' && target.href.indexOf('https://' + host) === -1) {
-                                var response = confirm(
-                                    "WARNING\n"
-                                    + "***************************************************\n"
-                                    + "* This link is taking you away from this website *\n"
-                                    + "***************************************************\n\n"
-                                    + "The destination URL is:\n" + target.href + "\n\n"
-                                    + "Do you want to continue?"
-                                );
-                                if (!response) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    return false;
-                                }
-                            }
-                        });
+            isBlackListed: function(url) {
+                for(var i=0; i<contentObject.blacklist.length; i++) {
+                    var blDomain = contentObject.blacklist[i];
+                    if (url.indexOf(blDomain) !== -1) {
+                        return true;
                     }
-                }, 2000);
+                }
+
+                return false;
+            },
+
+            init: function () {
+                console.log('init');
+                var url = window.location.href,
+                    host = window.location.host,
+                    body = document.getElementsByTagName('body')[0],
+                    anchors = document.getElementsByTagName('a');
+
+                for(var i=0; i< anchors.length; i++) {
+                    var anchor = anchors[i];
+
+                    if (anchor.href && anchor.href !== '' && anchor.href.indexOf('https://' + host) === -1) {
+                        var isBlackListed = contentObject.isBlackListed(anchor.href);
+                        if (isBlackListed) {
+                            anchor.style.color = "red";
+                            anchor.style.textDecoration = "line-through";
+                            anchor.title = "This link leads to a blacklisted (SCAM/PHISHING) website!";
+                            anchor.innerHTML = "SCAM DETECTED !!" + anchor.innerHTML + "!!";
+                        }
+                    }
+                }
+
+                body.innerHTML += '<style>' +
+                    '.PostFull__body a[rel="noopener"]:after, .PostFull__body a[rel="nofollow noopener"]:after {' +
+                    '  background-image: url(\'data:image/svg+xml; utf8, <svg height="1024" width="768" xmlns="http://www.w3.org/2000/svg"><path d="M640 768H128V257.90599999999995L256 256V128H0v768h768V576H640V768zM384 128l128 128L320 448l128 128 192-192 128 128V128H384z" fill="#ff0000"/></svg>\') !important;' +
+                    '}' +
+                    '</style>';
+
+                console.log('Steemed Phish: Done');
             }
-        }
+        };
 
-        contentObject.init();
-    },
+        // Wait until the post content is loaded into the DOM
+        var timer = window.setInterval(function(contentObject) {
+            return function() {
+                if (document.getElementsByClassName('entry-title').length > 0) {
+                    contentObject.init();
+                    window.clearInterval(timer);
+                }
+            };
+        }(contentObject), 500);
 
-    log: function() {
-        var prefix = 'Steemed Phish:';
-        if (typeof arguments.unshift === 'undefined') {
-            arguments[0] = prefix + ' ' + arguments[0];
-        } else {
-            arguments.unshift(prefix);
-        }
-        console.log.apply(null, arguments);
     }
 }
 

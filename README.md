@@ -1,5 +1,13 @@
 # steemedphish
 
+## v0.0.8
+- added more whitelisted sites
+- one extra color for the extension icon: red = blacklisted site, green = known good steemit related site, grey = not a known steemit related site
+- the alert on a click on an external link has been removed and replaced by the behaviour below
+- steemit.com has added a little grey icon next to a link that takes you away from it, this icon is now made red instead of grey for better visibility
+- if an external link is from a blacklisted site, the link will highlighted in red and stricken through and marked as SCAM
+- a link back to the equivalent page on Steemit is added to the full page alert
+
 ## v0.0.7
 - added a popup screen when you click on the extension icon info on how to contact me for reporting new scams
 - fixed the full page red warning panel to display for steewit.com

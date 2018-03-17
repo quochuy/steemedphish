@@ -17,7 +17,12 @@ var background = {
         "https://thesteemitshop.com/",
         "https://developers.steem.io/",
         "https://steem.io/",
-        "https://smt.steem.io/"
+        "https://smt.steem.io/",
+        "https://steemkr.com/",
+        "https://yehey.org/",
+        "https://steemitstage.com/",
+        "https://steemd.com/",
+        "https://steemdb.com/"
     ],
 
     blacklist: [
@@ -30,17 +35,7 @@ var background = {
     init: function() {
         chrome.tabs.onActivated.addListener(function(info){
             chrome.tabs.get(info.tabId, function(change){
-                var isWhitelisted = background.isWhitelisted(change.url);
-                if(isWhitelisted){
-                    chrome.browserAction.setIcon({path: '../images/icon.png', tabId: info.tabId});
-                } else {
-                    chrome.browserAction.setIcon({path: '../images/icon-red.png', tabId: info.tabId});
-
-                    var isBlacklisted = background.isBlackListed(change.url);
-                    if (isBlacklisted) {
-                        alert(background.alertMessage + change.url);
-                    }
-                }
+                background.updateIconColorByUrl(change.url, info.tabId);
             });
         });
 
@@ -49,22 +44,32 @@ var background = {
                 return;
             }
 
-            var isWhitelisted = background.isWhitelisted(tab.url);
-            if(isWhitelisted){
-                chrome.browserAction.setIcon({path: '../images/icon.png', tabId: tabId});
-            } else {
+            background.updateIconColorByUrl(tab.url, tabId);
+        });
+    },
+
+    updateIconColorByUrl: function(url, tabId)
+    {
+        var isWhitelisted = background.isWhitelisted(url);
+        if(isWhitelisted){
+            chrome.browserAction.setIcon({path: '../images/icon.png', tabId: tabId});
+        } else {
+            var isBlacklisted = background.isBlackListed(url);
+            if (isBlacklisted) {
                 chrome.browserAction.setIcon({path: '../images/icon-red.png', tabId: tabId});
 
-                var isBlacklisted = background.isBlackListed(tab.url);
-                if (isBlacklisted && background.alertDisplayed === false) {
+                if (background.alertDisplayed === false) {
                     background.alertDisplayed = true;
-                    alert(background.alertMessage + tab.url);
+                    alert(background.alertMessage + url);
+
                     setTimeout(function() {
                         background.alertDisplayed = false;
                     }, 15000);
                 }
+            } else {
+                chrome.browserAction.setIcon({path: '../images/icon-grey.png', tabId: tabId});
             }
-        });
+        }
     },
 
     isWhitelisted: function(url) {
