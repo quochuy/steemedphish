@@ -29,11 +29,14 @@ var contentScript = {
             initObserver: function() {
                 var body = document.body;
 
+                contentObject.injectCss();
+
                 // Using a MutationObserver to wait for a DOM change
                 // This is to scan dynamically loaded content (lazyload of comments for example)
                 contentObject.observer = new MutationObserver(function(contentObject) {
                     return function(mutations) {
                         mutations.forEach(function(mutation) {
+                            // Preventing multipl calls to checkAnchors()
                             if (contentObject.observerTimer) {
                                 window.clearTimeout(contentObject.observerTimer);
                             }
@@ -48,6 +51,18 @@ var contentScript = {
                 }(contentObject));
 
                 contentObject.observer.observe(body, contentObject.observerConfig);
+            },
+
+            injectCss: function() {
+                console.log('Steemed Phish: injecting CSS');
+
+                var head = document.getElementsByTagName('head')[0];
+                head.innerHTML += '<style>' +
+                    '.PostFull__body a[rel="noopener"]:after, .PostFull__body a[rel="nofollow noopener"]:after,' +
+                    'a[rel="noopener"]:after, a[rel="nofollow noopener"]:after {' +
+                    '  background-image: url(\'data:image/svg+xml; utf8, <svg height="1024" width="768" xmlns="http://www.w3.org/2000/svg"><path d="M640 768H128V257.90599999999995L256 256V128H0v768h768V576H640V768zM384 128l128 128L320 448l128 128 192-192 128 128V128H384z" fill="#ff0000"/></svg>\') !important;' +
+                    '}' +
+                    '</style>';
             },
 
             isBlackListed: function(url) {
@@ -90,15 +105,7 @@ var contentScript = {
             },
 
             init: function () {
-                contentObject.observerTimer = window.setTimeout(contentObject.checkAnchors, 3000);
-
-                var head = document.getElementsByTagName('head')[0];
-                head.innerHTML += '<style>' +
-                    '.PostFull__body a[rel="noopener"]:after, .PostFull__body a[rel="nofollow noopener"]:after,' +
-                    'a[rel="noopener"]:after, a[rel="nofollow noopener"]:after {' +
-                    '  background-image: url(\'data:image/svg+xml; utf8, <svg height="1024" width="768" xmlns="http://www.w3.org/2000/svg"><path d="M640 768H128V257.90599999999995L256 256V128H0v768h768V576H640V768zM384 128l128 128L320 448l128 128 192-192 128 128V128H384z" fill="#ff0000"/></svg>\') !important;' +
-                    '}' +
-                    '</style>';
+                contentObject.checkAnchors();
 
                 console.log('Steemed Phish: Done');
             }
