@@ -30,7 +30,6 @@ var contentScript = {
             },
 
             init: function () {
-                console.log('init');
                 var url = window.location.href,
                     host = window.location.host,
                     body = document.getElementsByTagName('body')[0],
@@ -50,11 +49,15 @@ var contentScript = {
                     }
                 }
 
-                body.innerHTML += '<style>' +
-                    '.PostFull__body a[rel="noopener"]:after, .PostFull__body a[rel="nofollow noopener"]:after {' +
-                    '  background-image: url(\'data:image/svg+xml; utf8, <svg height="1024" width="768" xmlns="http://www.w3.org/2000/svg"><path d="M640 768H128V257.90599999999995L256 256V128H0v768h768V576H640V768zM384 128l128 128L320 448l128 128 192-192 128 128V128H384z" fill="#ff0000"/></svg>\') !important;' +
-                    '}' +
-                    '</style>';
+                window.setTimeout(function() {
+                    var body = document.getElementsByTagName('body')[0];
+
+                    body.innerHTML += '<style>' +
+                        '.PostFull__body a[rel="noopener"]:after, .PostFull__body a[rel="nofollow noopener"]:after {' +
+                        '  background-image: url(\'data:image/svg+xml; utf8, <svg height="1024" width="768" xmlns="http://www.w3.org/2000/svg"><path d="M640 768H128V257.90599999999995L256 256V128H0v768h768V576H640V768zM384 128l128 128L320 448l128 128 192-192 128 128V128H384z" fill="#ff0000"/></svg>\') !important;' +
+                        '}' +
+                        '</style>';
+                }, 3000);
 
                 console.log('Steemed Phish: Done');
             }
