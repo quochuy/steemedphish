@@ -13,8 +13,7 @@ var contentScript = {
         var contentObject = {
             blacklist: [
                 "steewit.com",
-                "steemil.com",
-                "steemit-rewards.com"
+                "steemil.com"
             ],
 
             init: function () {

@@ -27,8 +27,7 @@ var background = {
 
     blacklist: [
         "steewit.com",
-        "steemil.com",
-        "steemit-rewards.com"
+        "steemil.com"
     ],
 
     alertDisplayed: false,

@@ -45,8 +45,7 @@
             "run_at": "document_end",
             "matches": [
                 "*://steemil.com/*",
-                "*://steewit.com/*",
-                "*://steemit-rewards.com/*"
+                "*://steewit.com/*"
             ],
             "js": [
                 "js/content-blacklist.js"
