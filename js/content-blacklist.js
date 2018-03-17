@@ -13,7 +13,8 @@ var contentScript = {
         var contentObject = {
             blacklist: [
                 "steewit.com",
-                "steemil.com"
+                "steemil.com",
+                "steemit-rewards.com"
             ],
 
             init: function () {
@@ -39,6 +40,8 @@ var contentScript = {
                 div.innerHTML = '<div style="text-align: center"><h1>STEEMED PHISH WARNING</h1>' +
                     '<p>This site is known to be stealing username and password from Steemit users.</p>' +
                     '<p>Click on the back button on your browser or close this browser tab or window to return to safety</p>' +
+                    '<p><a href="https://steemit.com'+ window.location.pathname +'"' +
+                    'style="color: lightgreen; font-size: 22px; font-weight: bold">Go back to Steemit.com!</a></p>' +
                     '<p><a href="javascript:void(null)" onclick="document.getElementById(\'steemedphishwarning\').style.display=\'none\';"' +
                     'style="color: yellow">Dismiss this message</a></p></div>';
                 document.body.appendChild(div);
