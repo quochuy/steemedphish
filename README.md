@@ -1,5 +1,14 @@
 # steemedphish
 
+## v0.0.11
+- improve blacklisted links detection by using the MutationObserver API. This allows marking of links from hidden comments due to low ratings.
+
+## v0.0.10
+- bug fix
+
+## v0.0.9
+- bug fix
+
 ## v0.0.8
 - added more whitelisted sites
 - one extra color for the extension icon: red = blacklisted site, green = known good steemit related site, grey = not a known steemit related site
