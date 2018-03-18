@@ -1,5 +1,8 @@
 # steemedphish
 
+## v0.0.13
+- better fix for flickering of page when injecting custom css
+
 ## v0.0.12
 - added new blacklisted domain
 - share blacklist between the background and content scripts
