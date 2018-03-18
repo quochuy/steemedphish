@@ -1,5 +1,9 @@
 # steemedphish
 
+## v0.0.12
+- added new blacklisted domain
+- share blacklist between the background and content scripts
+
 ## v0.0.11
 - improve blacklisted links detection by using the MutationObserver API. This allows marking of links from hidden comments due to low ratings.
 
