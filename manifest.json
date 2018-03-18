@@ -36,6 +36,9 @@
                 "*://yehey.org/*",
                 "*://steemitstage.com/*"
             ],
+            "css": [
+                "css/overrideSteemit.css"
+            ],
             "js": [
                 "js/content.js"
             ]
