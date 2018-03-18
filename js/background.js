@@ -27,12 +27,15 @@ var background = {
 
     blacklist: [
         "steewit.com",
-        "steemil.com"
+        "steemil.com",
+        "sleemit.com"
     ],
 
     alertDisplayed: false,
 
     init: function() {
+        chrome.extension.onRequest.addListener(background.requestListener);
+
         chrome.tabs.onActivated.addListener(function(info){
             chrome.tabs.get(info.tabId, function(change){
                 background.updateIconColorByUrl(change.url, info.tabId);
@@ -46,6 +49,28 @@ var background = {
 
             background.updateIconColorByUrl(tab.url, tabId);
         });
+    },
+
+    requestListener: function (request, sender, sendResponse) {
+        // Only process request sent from the current tab
+        chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
+            // since only one tab should be active and in the current window at once
+            // the return variable should only have one entry
+            var activeTab = arrayOfTabs[0];
+            var activeTabId = activeTab.id; // or do whatever you need
+
+            if (activeTabId == sender.tab.id) {
+                switch(true) {
+                    case request.hasOwnProperty('getBlacklist'):
+                        console.log('getBlacklist request');
+                        chrome.tabs.sendRequest(activeTabId, {blacklist: background.blacklist}, function (response) {});
+                        break;
+                }
+            }
+
+        });
+
+        background.listening = false;
     },
 
     updateIconColorByUrl: function(url, tabId)

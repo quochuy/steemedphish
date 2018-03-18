@@ -2,19 +2,29 @@ var contentScript = {
     init: function () {
         contentScript.log('Injecting the blacklist content script...');
 
-        var script = document.createElement('script');
-        script.appendChild(document.createTextNode('(' + contentScript.inject + ')();'));
-        document.body.appendChild(script);
+        window.onload = function() {
+            chrome.extension.sendRequest({getBlacklist: true});
+            chrome.extension.onRequest.addListener(contentScript.requestListener);
+        }
 
         contentScript.log('Done.');
     },
 
-    inject: function () {
+    requestListener: function (request, sender, sendResponse) {
+        switch(true) {
+            case request.hasOwnProperty('blacklist'):
+                console.log('got blacklist 2', request.blacklist);
+                var script = document.createElement('script');
+                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.blacklist) +');'));
+
+                document.body.appendChild(script);
+                break;
+        }
+    },
+
+    inject: function (blacklist) {
         var contentObject = {
-            blacklist: [
-                "steewit.com",
-                "steemil.com"
-            ],
+            blacklist: blacklist,
 
             init: function () {
                 var host = window.location.host;
@@ -55,7 +65,7 @@ var contentScript = {
                 }
 
                 return false;
-            },
+            }
         }
 
         contentObject.init();
