@@ -11,8 +11,11 @@
         "contextMenus"
     ],
     "browser_action": {
-        "default_icon": "images/icon-grey.png",
+        "default_icon": "images/icon2-48-grey.png",
         "default_popup": "popup.html"
+    },
+    "icons": {
+        "128": "images/icon2-128-grey.png"
     },
     "background": {
         "scripts": [

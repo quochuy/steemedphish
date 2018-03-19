@@ -22,7 +22,8 @@ var background = {
         "https://yehey.org/",
         "https://steemitstage.com/",
         "https://steemd.com/",
-        "https://steemdb.com/"
+        "https://steemdb.com/",
+        "http://www.steemschool.net/"
     ],
 
     blacklist: [
@@ -77,11 +78,12 @@ var background = {
     {
         var isWhitelisted = background.isWhitelisted(url);
         if(isWhitelisted){
-            chrome.browserAction.setIcon({path: '../images/icon.png', tabId: tabId});
+            //<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+            chrome.browserAction.setIcon({path: '../images/icon2-48-green.png', tabId: tabId});
         } else {
             var isBlacklisted = background.isBlackListed(url);
             if (isBlacklisted) {
-                chrome.browserAction.setIcon({path: '../images/icon-red.png', tabId: tabId});
+                chrome.browserAction.setIcon({path: '../images/icon2-48-red.png', tabId: tabId});
 
                 if (background.alertDisplayed === false) {
                     background.alertDisplayed = true;
@@ -92,7 +94,7 @@ var background = {
                     }, 15000);
                 }
             } else {
-                chrome.browserAction.setIcon({path: '../images/icon-grey.png', tabId: tabId});
+                chrome.browserAction.setIcon({path: '../images/icon2-48-grey.png', tabId: tabId});
             }
         }
     },

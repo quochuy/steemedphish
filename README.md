@@ -1,5 +1,8 @@
 # steemedphish
 
+## v0.0.14
+- click on the extension icon to see instructions on how to send me new sites to be whitelisted or blacklisted
+
 ## v0.0.13
 - better fix for flickering of page when injecting custom css
 
