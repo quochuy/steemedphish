@@ -76,7 +76,7 @@ var contentScript = {
                 console.log('Steemed Phish: Checking anchors');
 
                 var host = window.location.host,
-                    anchors = document.querySelectorAll('a[href]:not(.steemed-phish-checked)');
+                    anchors = document.querySelectorAll('.Post a[href]:not(.steemed-phish-checked)');
 
                 for(var i=0; i< anchors.length; i++) {
                     var anchor = anchors[i];
