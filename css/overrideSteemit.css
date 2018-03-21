@@ -1,4 +1,20 @@
 .PostFull__body a[rel="noopener"]:after, .PostFull__body a[rel="nofollow noopener"]:after,
 a[rel="noopener"]:after, a[rel="nofollow noopener"]:after {
-  background-image: url('data:image/svg+xml; utf8, <svg height="1024" width="768" xmlns="http://www.w3.org/2000/svg"><path d="M640 768H128V257.90599999999995L256 256V128H0v768h768V576H640V768zM384 128l128 128L320 448l128 128 192-192 128 128V128H384z" fill="#ff0000"/></svg>') !important;
+  background-image: url('data:image/svg+xml; utf8, <svg height="1024" width="768" xmlns="http://www.w3.org/2000/svg"><path d="M640 768H128V257.90599999999995L256 256V128H0v768h768V576H640V768zM384 128l128 128L320 448l128 128 192-192 128 128V128H384z" fill="#d13fff"/></svg>') !important;
+}
+
+.external-link-tooltip {
+    display: none;
+    margin-left: 28px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1000;
+    width:200px;
+    height:100px;
+    background-color: #fbeeff;
+    border: solid 1px #f6d8ff;
+    border-radius: 3px;
+    color: black;
+    font-size: 12px;
+    line-height: 15px;
 }

@@ -6,16 +6,15 @@ var contentScript = {
     init: function () {
         console.log('Steemed Phish: init content script...');
 
-        window.onload = function() {
+        document.addEventListener("DOMContentLoaded", function(event) {
             chrome.extension.sendRequest({getBlacklist: true});
             chrome.extension.onRequest.addListener(contentScript.requestListener);
-        }
+        });
     },
 
     requestListener: function (request, sender, sendResponse) {
         switch(true) {
             case request.hasOwnProperty('blacklist'):
-                console.log('got blacklist', request.blacklist);
                 var script = document.createElement('script');
                 script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.blacklist) +');'));
 
@@ -28,6 +27,7 @@ var contentScript = {
         var contentObject = {
             blacklist: blacklist,
             observer: null,
+            tooltip: null,
             observerConfig: {
                 attributes: false,
                 childList: true,
@@ -76,10 +76,11 @@ var contentScript = {
                 console.log('Steemed Phish: Checking anchors');
 
                 var host = window.location.host,
-                    anchors = document.getElementsByTagName('a');
+                    anchors = document.querySelectorAll('.Post a[href]:not(.steemed-phish-checked)');
 
                 for(var i=0; i< anchors.length; i++) {
                     var anchor = anchors[i];
+
 
                     if (
                         anchor.href
@@ -88,19 +89,53 @@ var contentScript = {
                         && !anchor.classList.contains('steemed-phish')
                     ) {
                         var isBlackListed = contentObject.isBlackListed(anchor.href);
+
                         if (isBlackListed) {
+                            // If in the blacklist then make it very obvious
+
                             console.log('Steemed Phish: found blacklisted link ', anchor.href);
                             anchor.style.color = "red";
                             anchor.style.textDecoration = "line-through";
                             anchor.title = "This link leads to a blacklisted (SCAM/PHISHING) website!";
                             anchor.innerHTML = "SCAM DETECTED !!" + anchor.innerHTML + "!!";
                             anchor.classList.add("steemed-phish");
+                            anchor.classList.add("steemed-phish-external");
+                            anchor.classList.add("steemed-phish-checked");
+                        } else {
+                            // else show a tooltip informing that upon click, they will leave the current site
+                            if (!anchor.classList.contains('steemed-phish-external')) {
+                                anchor.classList.add("steemed-phish-external");
+                                anchor.classList.add("steemed-phish-checked");
+                                anchor.title = "";
+                                anchor.addEventListener('mousemove', contentObject.mousemoveHandler);
+                                anchor.addEventListener('mouseout', contentObject.mouseoutHandler);
+                            }
                         }
+                    } else {
+                        anchor.classList.add("steemed-phish-checked");
                     }
                 }
             },
 
+            mousemoveHandler: function(e) {
+                var tooltip = document.querySelector('.external-link-tooltip');
+                if (tooltip) {
+                    tooltip.style.display = "block";
+                    tooltip.style.left = e.pageX + 'px';
+                    tooltip.style.top = e.pageY + 'px';
+                }
+            },
+
+            mouseoutHandler: function(e) {
+                var tooltip = document.querySelector('.external-link-tooltip');
+                if (tooltip) {
+                    tooltip.style.display = "none";
+                }
+            },
+
             init: function () {
+                document.body.innerHTML += "<span class=\"external-link-tooltip\">This link will take you away from this website. Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!<span>";
+
                 contentObject.checkAnchors();
 
                 console.log('Steemed Phish: Done');
@@ -109,17 +144,6 @@ var contentScript = {
 
         contentObject.initObserver();
         contentObject.init();
-
-        // Wait until the post content is loaded into the DOM
-        var timer = window.setInterval(function(contentObject) {
-            return function() {
-                if (document.getElementsByClassName('entry-title').length > 0) {
-
-                    window.clearInterval(timer);
-                }
-            };
-        }(contentObject), 500);
-
     }
 }
 

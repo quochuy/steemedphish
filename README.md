@@ -1,4 +1,12 @@
 # steemedphish
+## v0.0.16
+- the external link marker is now purple instead of read to not be confused with a scam link that is also red
+- faster scan of anchors
+- use a tooltip that moves with the mouse to make external links more visible
+
+## v0.0.15
+- whitelist update
+- icon update
 
 ## v0.0.14
 - click on the extension icon to see instructions on how to send me new sites to be whitelisted or blacklisted
