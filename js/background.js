@@ -29,7 +29,20 @@ var background = {
     blacklist: [
         "steewit.com",
         "steemil.com",
-        "sleemit.com"
+        "sleemit.com",
+        "steemitfollowup.ml",
+        "steemitfollowup.com",
+        "steemitfollowup.ga",
+        "steemitfollowup.cf",
+        "steemitfollowup.gq",
+        "*://steemit.000webhostapp.com",
+        "*://autosteemit.wapka.mobi",
+        "autosteemer.com",
+        "steemconnect.ml",
+        "steemiit.tk",
+        "stemit.com",
+        "șteemit.com",
+        "steeemit.ml/*"
     ],
 
     alertDisplayed: false,
