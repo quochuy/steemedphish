@@ -29,7 +29,20 @@ var background = {
     blacklist: [
         "steewit.com",
         "steemil.com",
-        "sleemit.com"
+        "sleemit.com",
+        "steemitfollowup.ml",
+        "steemitfollowup.com",
+        "steemitfollowup.ga",
+        "steemitfollowup.cf",
+        "steemitfollowup.gq",
+        "steemit.000webhostapp.com",
+        "autosteemit.wapka.mobi",
+        "autosteemer.com",
+        "steemconnect.ml",
+        "steemiit.tk",
+        "stemit.com",
+        "șteemit.com",
+        "steeemit.ml"
     ],
 
     alertDisplayed: false,
@@ -52,6 +65,19 @@ var background = {
         });
     },
 
+    unshortenUrl: function (url, callback) {
+        var http = new XMLHttpRequest();
+        http.open('GET', 'http://expandurl.com/api/v1/?url=' + url);
+        http.onreadystatechange = function() {
+            console.log('statechange');
+            if (this.status == 200) {
+                console.log('res', http.responseText);
+                callback(url, http.responseText);
+            }
+        };
+        http.send();
+    },
+
     requestListener: function (request, sender, sendResponse) {
         // Only process request sent from the current tab
         chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
@@ -63,8 +89,13 @@ var background = {
             if (activeTabId == sender.tab.id) {
                 switch(true) {
                     case request.hasOwnProperty('getBlacklist'):
-                        console.log('getBlacklist request');
                         chrome.tabs.sendRequest(activeTabId, {blacklist: background.blacklist}, function (response) {});
+                        break;
+
+                    case request.hasOwnProperty('unshortenUrl'):
+                        background.unshortenUrl(request.unshortenUrl, function(url, longUrl) {
+                            chrome.tabs.sendRequest(activeTabId, {url: url, longUrl: longUrl}, function (response) {});
+                        });
                         break;
                 }
             }
