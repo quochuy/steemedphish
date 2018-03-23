@@ -2,13 +2,12 @@
     "manifest_version": 2,
     "name": "Steemed Phish",
     "description": "A Chrome extension that will warn you if you are being lured into a fake Steemit website.",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "permissions": [
         "tabs",
         "http://*/*",
-        "idle",
-        "contextMenus"
+        "idle"
     ],
     "browser_action": {
         "default_icon": "images/icon2-48-grey.png",
