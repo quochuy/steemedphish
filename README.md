@@ -1,5 +1,5 @@
 # steemedphish
-## v0.0.17
+## v0.0.19
 - blacklist update
 - unshorten URL from links and check them against black lists
 
