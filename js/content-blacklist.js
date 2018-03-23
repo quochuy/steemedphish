@@ -3,7 +3,7 @@ var contentScript = {
         contentScript.log('Injecting the blacklist content script...');
 
         window.onload = function() {
-            chrome.extension.sendRequest({getBlacklist: true});
+            chrome.extension.sendRequest({getSiteLists: true});
             chrome.extension.onRequest.addListener(contentScript.requestListener);
         }
 
@@ -15,16 +15,17 @@ var contentScript = {
             case request.hasOwnProperty('blacklist'):
                 console.log('got blacklist 2', request.blacklist);
                 var script = document.createElement('script');
-                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.blacklist) +');'));
+                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request) +');'));
 
                 document.body.appendChild(script);
                 break;
         }
     },
 
-    inject: function (blacklist) {
+    inject: function (siteList) {
         var contentObject = {
-            blacklist: blacklist,
+            blacklist: siteList.blacklist,
+            whitelist: siteList.whitelist,
 
             init: function () {
                 var host = window.location.host;

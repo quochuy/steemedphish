@@ -67,11 +67,9 @@ var background = {
 
     unshortenUrl: function (url, callback) {
         var http = new XMLHttpRequest();
-        http.open('GET', 'http://expandurl.com/api/v1/?url=' + url);
+        http.open('GET', 'http://expandurl.com/api/v1/?url=' + encodeURIComponent(url));
         http.onreadystatechange = function() {
-            console.log('statechange');
             if (this.status == 200) {
-                console.log('res', http.responseText);
                 callback(url, http.responseText);
             }
         };
@@ -88,8 +86,8 @@ var background = {
 
             if (activeTabId == sender.tab.id) {
                 switch(true) {
-                    case request.hasOwnProperty('getBlacklist'):
-                        chrome.tabs.sendRequest(activeTabId, {blacklist: background.blacklist}, function (response) {});
+                    case request.hasOwnProperty('getSiteLists'):
+                        chrome.tabs.sendRequest(activeTabId, {blacklist: background.blacklist, whitelist: background.whitelist}, function (response) {});
                         break;
 
                     case request.hasOwnProperty('unshortenUrl'):
