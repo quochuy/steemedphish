@@ -6,10 +6,27 @@ var contentScript = {
     init: function () {
         console.log('Steemed Phish: init content script...');
 
+        //chrome.runtime.onMessage.addListener(contentScript.pageMessageListener);
+        window.addEventListener('message', contentScript.pageMessageListener);
+
         document.addEventListener("DOMContentLoaded", function(event) {
             chrome.extension.sendRequest({getBlacklist: true});
             chrome.extension.onRequest.addListener(contentScript.requestListener);
         });
+    },
+
+    pageMessageListener: function(event) {
+        // Only accept messages from same frame
+        if (event.source !== window) {
+            return;
+        }
+
+        var message = event.data;
+        switch(true) {
+            case (message.hasOwnProperty('unshortenUrl')):
+                chrome.extension.sendRequest(message);
+                break;
+        }
     },
 
     requestListener: function (request, sender, sendResponse) {
@@ -19,6 +36,13 @@ var contentScript = {
                 script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.blacklist) +');'));
 
                 document.body.appendChild(script);
+                break;
+
+            case request.hasOwnProperty('longUrl'):
+                if (request.longUrl !== '') {
+                    window.postMessage(request, '*');
+                }
+
                 break;
         }
     },
@@ -86,7 +110,7 @@ var contentScript = {
                         anchor.href
                         && anchor.href !== ''
                         && anchor.href.indexOf('https://' + host) === -1
-                        && !anchor.classList.contains('steemed-phish')
+                        && !anchor.classList.contains('steemed-phish-checked')
                     ) {
                         var isBlackListed = contentObject.isBlackListed(anchor.href);
 
@@ -99,21 +123,22 @@ var contentScript = {
                             anchor.title = "This link leads to a blacklisted (SCAM/PHISHING) website!";
                             anchor.innerHTML = "SCAM DETECTED !!" + anchor.innerHTML + "!!";
                             anchor.classList.add("steemed-phish");
-                            anchor.classList.add("steemed-phish-external");
-                            anchor.classList.add("steemed-phish-checked");
+                            
                         } else {
                             // else show a tooltip informing that upon click, they will leave the current site
-                            if (!anchor.classList.contains('steemed-phish-external')) {
-                                anchor.classList.add("steemed-phish-external");
-                                anchor.classList.add("steemed-phish-checked");
+                            if (!anchor.classList.contains('steemed-phish-checked')) {
                                 anchor.title = "";
                                 anchor.addEventListener('mousemove', contentObject.mousemoveHandler);
                                 anchor.addEventListener('mouseout', contentObject.mouseoutHandler);
                             }
-                        }
-                    } else {
-                        anchor.classList.add("steemed-phish-checked");
+
+                            if (!anchor.classList.contains('steemed-phish-unshortened')) {
+                                window.postMessage({unshortenUrl: anchor.href}, '*');
+                            }
+                        } 
                     }
+
+                    anchor.classList.add("steemed-phish-checked");
                 }
             },
 
@@ -133,8 +158,37 @@ var contentScript = {
                 }
             },
 
+            pageMessageListener: function(event) {
+                // Only accept messages from same frame
+                if (event.source !== window) {
+                    return;
+                }
+
+                var message = event.data;
+                switch(true) {
+                    case (message.hasOwnProperty('longUrl') && message.hasOwnProperty('url')):
+                        var longUrl = message.longUrl;
+                        var scamAnchorSelector = 'a[href="'+ message.url +'"]';
+
+                        var scamAnchor = document.querySelector(scamAnchorSelector);
+                        if (scamAnchor) {
+                            
+                            scamAnchor.href = message.longUrl;
+                            scamAnchor.classList.add('steemed-phish-unshortened');
+                            scamAnchor.classList.remove('steemed-phish-checked');
+
+                            contentObject.checkAnchors();
+                        }
+                        break;
+                }
+            },
+
             init: function () {
-                document.body.innerHTML += "<span class=\"external-link-tooltip\">This link will take you away from this website. Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!<span>";
+                window.addEventListener('message', contentObject.pageMessageListener);
+                var span = document.createElement('span');
+                span.className = "external-link-tooltip";
+                span.innerHTML = 'This link will take you away from this website. Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!';
+                document.body.appendChild(span);
 
                 contentObject.checkAnchors();
 

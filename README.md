@@ -1,4 +1,8 @@
 # steemedphish
+## v0.0.17
+- blacklist update
+- unshorten URL from links and check them against black lists
+
 ## v0.0.16
 - the external link marker is now purple instead of read to not be confused with a scam link that is also red
 - faster scan of anchors
