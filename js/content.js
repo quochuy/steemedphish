@@ -11,7 +11,7 @@ var contentScript = {
 
         document.addEventListener("DOMContentLoaded", function(event) {
             // Requesting blacklist from the background process
-            chrome.extension.sendRequest({getBlacklist: true});
+            chrome.extension.sendRequest({getSiteLists: true});
 
             // Listening to messages coming from the background process
             chrome.extension.onRequest.addListener(contentScript.requestListener);
@@ -38,7 +38,7 @@ var contentScript = {
         switch(true) {
             case request.hasOwnProperty('blacklist'):
                 var script = document.createElement('script');
-                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.blacklist) +');'));
+                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request) +');'));
 
                 document.body.appendChild(script);
                 break;
@@ -53,9 +53,10 @@ var contentScript = {
         }
     },
 
-    inject: function (blacklist) {
+    inject: function (siteList) {
         var contentObject = {
-            blacklist: blacklist,
+            blacklist: siteList.blacklist,
+            whitelist: siteList.whitelist,
             observer: null,
             tooltip: null,
             observerConfig: {
@@ -103,6 +104,17 @@ var contentScript = {
                 return false;
             },
 
+            isWhitelisted: function(url) {
+                for(var i=0; i<contentObject.whitelist.length; i++) {
+                    var wlDomain = contentObject.whitelist[i];
+                    if (url.indexOf(wlDomain) !== -1) {
+                        return true;
+                    }
+                }
+
+                return false;
+            },
+
             checkAnchors: function() {
                 console.log('Steemed Phish: Checking anchors');
 
@@ -140,7 +152,10 @@ var contentScript = {
                             }
 
                             // Let see if this is a short URL and what it redirects to
-                            if (!anchor.classList.contains('steemed-phish-unshortened')) {
+                            if (
+                                !contentObject.isWhitelisted(anchor.href)
+                                && !anchor.classList.contains('steemed-phish-unshortened')
+                            ) {
                                 anchor.classList.add("steemed-phish-unshortening");
                                 window.postMessage({unshortenUrl: anchor.href}, '*');
                             }
