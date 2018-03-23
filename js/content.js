@@ -130,7 +130,10 @@ var contentScript = {
             },
 
             init: function () {
-                document.body.innerHTML += "<span class=\"external-link-tooltip\">This link will take you away from "+ window.location.hostname +". Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!<span>";
+                var div = document.createElement('span');
+                div.className = "external-link-tooltip";
+                div.innerHTML = "This link will take you away from "+ window.location.hostname +". Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!";
+                document.body.appendChild(div);
 
                 contentObject.checkAnchors();
 
