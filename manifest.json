@@ -50,9 +50,22 @@
         {
             "run_at": "document_end",
             "matches": [
-                "*://steemil.com/*",
-                "*://steewit.com/*",
-                "*://sleemit.com/*"
+                "*://*.steemil.com/*",
+                "*://*.steewit.com/*",
+                "*://*.sleemit.com/*",
+                "*://*.steemitfollowup.ml/*",
+                "*://*.steemitfollowup.com/*",
+                "*://*.steemitfollowup.ga/*",
+                "*://*.steemitfollowup.cf/*",
+                "*://*.steemitfollowup.gq/*",
+                "*://steemit.000webhostapp.com/*",
+                "*://autosteemit.wapka.mobi/*",
+                "*://*.autosteemer.com/*",
+                "*://*.steemconnect.ml/*",
+                "*://*.steemiit.tk/*",
+                "*://*.stemit.com/*",
+                "*://*.șteemit.com/*",
+                "*://*.steeemit.ml/*"
             ],
             "js": [
                 "js/content-blacklist.js"
