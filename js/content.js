@@ -99,21 +99,17 @@ var contentScript = {
                             anchor.title = "This link leads to a blacklisted (SCAM/PHISHING) website!";
                             anchor.innerHTML = "SCAM DETECTED !!" + anchor.innerHTML + "!!";
                             anchor.classList.add("steemed-phish");
-                            anchor.classList.add("steemed-phish-external");
-                            anchor.classList.add("steemed-phish-checked");
                         } else {
                             // else show a tooltip informing that upon click, they will leave the current site
-                            if (!anchor.classList.contains('steemed-phish-external')) {
-                                anchor.classList.add("steemed-phish-external");
-                                anchor.classList.add("steemed-phish-checked");
-                                anchor.title = "";
-                                anchor.addEventListener('mousemove', contentObject.mousemoveHandler);
-                                anchor.addEventListener('mouseout', contentObject.mouseoutHandler);
-                            }
+                            anchor.title = "";
+                            anchor.addEventListener('mousemove', contentObject.mousemoveHandler);
+                            anchor.addEventListener('mouseout', contentObject.mouseoutHandler);
                         }
-                    } else {
-                        anchor.classList.add("steemed-phish-checked");
+
+                        anchor.rel = "noopener";
                     }
+
+                    anchor.classList.add("steemed-phish-checked");
                 }
             },
 
@@ -134,7 +130,7 @@ var contentScript = {
             },
 
             init: function () {
-                document.body.innerHTML += "<span class=\"external-link-tooltip\">This link will take you away from this website. Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!<span>";
+                document.body.innerHTML += "<span class=\"external-link-tooltip\">This link will take you away from "+ window.location.hostname +". Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!<span>";
 
                 contentObject.checkAnchors();
 
