@@ -23,7 +23,8 @@ var background = {
         "https://steemitstage.com/",
         "https://steemd.com/",
         "https://steemdb.com/",
-        "http://www.steemschool.net/"
+        "http://www.steemschool.net/",
+        "https://ipfs.io"
     ],
 
     blacklist: [

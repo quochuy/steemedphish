@@ -145,7 +145,10 @@ var contentScript = {
                             anchor.classList.add("steemed-phish");
                         } else {
                             // else show a tooltip informing that upon click, they will leave the current site
-                            if (!anchor.classList.contains('steemed-phish-checked')) {
+                            if (
+                                !contentObject.isWhitelisted(anchor.href)   // Skip the tooltip on friendly websites
+                                && !anchor.classList.contains('steemed-phish-checked')
+                            ) {
                                 anchor.title = "";
                                 anchor.addEventListener('mousemove', contentObject.mousemoveHandler);
                                 anchor.addEventListener('mouseout', contentObject.mouseoutHandler);
