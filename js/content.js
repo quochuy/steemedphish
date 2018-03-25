@@ -69,7 +69,7 @@ var contentScript = {
             observer: null,
             tooltip: null,
             observerConfig: {
-                attributes: true,
+                attributes: false,
                 childList: true,
                 subtree: true,
                 characterData: false
