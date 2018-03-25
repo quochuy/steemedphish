@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Steemed Phish",
     "description": "A Chrome extension that will warn you if you are being lured into a fake Steemit website.",
-    "version": "0.0.20",
+    "version": "0.0.21",
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "permissions": [
         "tabs",
@@ -32,6 +32,7 @@
                 "*://mspsteem.com/*",
                 "*://utopian.io/*",
                 "*://d.tube/*",
+                "*://dlive.io/*",
                 "*://dsound.audio/*",
                 "*://steemtools.com/*",
                 "*://steemkr.com/*",
@@ -64,7 +65,9 @@
                 "*://*.steemiit.tk/*",
                 "*://*.stemit.com/*",
                 "*://*.șteemit.com/*",
-                "*://*.steeemit.ml/*"
+                "*://*.steeemit.ml/*",
+                "*://*.steamit.ga/*",
+                "*://*.steemit.aba.ae/*"
             ],
             "js": [
                 "js/content-blacklist.js"

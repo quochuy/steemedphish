@@ -1,5 +1,6 @@
 var background = {
-    alertMessage: 'Steemed Phish Alert\n\nOne of your browser tabs has landed on a Steemit SCAM website: ',
+    alertMessage: 'One of your browser tabs has landed on a Steemit SCAM website: ',
+    alertSuspiciousMessage: 'One of your browser tabs has landed on a suspicious website. It is not a blacklisted website but looks suspicious. Be careful before using your Steemit keys: ',
 
     whitelist: [
         "https://steemit.com/",
@@ -24,7 +25,17 @@ var background = {
         "https://steemd.com/",
         "https://steemdb.com/",
         "http://www.steemschool.net/",
-        "https://ipfs.io"
+        "https://ipfs.io",
+        "https://dlive.io",
+        "https://discord.gg",
+        "https://steemworld.org",
+        "https://discordapp.com",
+        "https://steemnow.com",
+
+        // Image storage
+        "staticflickr.com",
+        "steemit-production-imageproxy-upload.s3.amazonaws.com",
+        "ipfs.busy.org"
     ],
 
     blacklist: [
@@ -43,7 +54,17 @@ var background = {
         "steemiit.tk",
         "stemit.com",
         "șteemit.com",
-        "steeemit.ml"
+        "steeemit.ml",
+        "steamit.ga",
+        "steemit.aba.ae"
+    ],
+
+    suspiciousHostnameRegexp: [
+        // URL where the hostname is just an IP address
+        /^https?:\/\/(([0-9]|[0-9][0-9\-]*[0-9])\.)*([0-9]|[0-9][0-9\-]*[0-9])\//gm,
+
+        // URL where the hostname is steemit.xxx.xxx
+        /^https?:\/\/steemit\..*\..*\//gm
     ],
 
     alertDisplayed: false,
@@ -88,7 +109,10 @@ var background = {
             if (activeTabId == sender.tab.id) {
                 switch(true) {
                     case request.hasOwnProperty('getSiteLists'):
-                        chrome.tabs.sendRequest(activeTabId, {blacklist: background.blacklist, whitelist: background.whitelist}, function (response) {});
+                        chrome.tabs.sendRequest(activeTabId, {
+                            blacklist: background.blacklist,
+                            whitelist: background.whitelist
+                        }, function (response) {});
                         break;
 
                     case request.hasOwnProperty('unshortenUrl'):
@@ -111,7 +135,7 @@ var background = {
             //<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
             chrome.browserAction.setIcon({path: '../images/icon2-48-green.png', tabId: tabId});
         } else {
-            var isBlacklisted = background.isBlackListed(url);
+            var isBlacklisted = background.isBlacklisted(url);
             if (isBlacklisted) {
                 chrome.browserAction.setIcon({path: '../images/icon2-48-red.png', tabId: tabId});
 
@@ -124,27 +148,66 @@ var background = {
                     }, 15000);
                 }
             } else {
+                if (background.isSuspicious(url)) {
+                    if (background.alertDisplayed === false) {
+                        background.alertDisplayed = true;
+                        alert(background.alertSuspiciousMessage + url);
+
+                        setTimeout(function() {
+                            background.alertDisplayed = false;
+                        }, 15000);
+                    }
+
+                }
                 chrome.browserAction.setIcon({path: '../images/icon2-48-grey.png', tabId: tabId});
             }
         }
     },
 
     isWhitelisted: function(url) {
-        for(var i=0; i<background.whitelist.length; i++) {
-            var wlDomain = background.whitelist[i];
-            if (url.indexOf(wlDomain) === 0) {
-                return true;
+        if (url.indexOf('http') === 0) {
+            var baseUrl = url.split('/').slice(0,3).join('/') + '/';
+
+            for(var i=0; i<background.whitelist.length; i++) {
+                var wlDomain = background.whitelist[i];
+                if (baseUrl.indexOf(wlDomain) === 0) {
+                    return true;
+                }
             }
         }
 
         return false;
     },
 
-    isBlackListed: function(url) {
-        for(var i=0; i<background.blacklist.length; i++) {
-            var blDomain = background.blacklist[i];
-            if (url.indexOf(blDomain) !== -1) {
-                return true;
+    isBlacklisted: function(url) {
+        if (url.indexOf('http') === 0) {
+            var baseUrl = url.split('/').slice(0,3).join('/') + '/';
+
+            for(var i=0; i<background.blacklist.length; i++) {
+                var blDomain = background.blacklist[i];
+                if (baseUrl.indexOf(blDomain) !== -1) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    },
+
+    isSuspicious: function(url) {
+        for(var i=0; i<background.suspiciousHostnameRegexp.length; i++) {
+            var regexp = background.suspiciousHostnameRegexp[i];
+            if (url.match(regexp)) {
+                var hostname = url.split('/')[2];
+
+                // If the hostname are IP addresses then don't warn of it is a private IP range
+                if (
+                    hostname.indexOf("10.") !== 0
+                    && hostname.indexOf("192.168.") !== 0
+                    && hostname.indexOf("172.16.") !== 0
+                ) {
+                    return true;
+                }
             }
         }
 

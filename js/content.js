@@ -57,15 +57,26 @@ var contentScript = {
         var contentObject = {
             blacklist: siteList.blacklist,
             whitelist: siteList.whitelist,
+
+            // TODO: find a way to pass regexp from the background script
+            suspiciousHostnameRegexp: [
+                // URL where the hostname is just an IP address
+                /^https?:\/\/(([0-9]|[0-9][0-9\-]*[0-9])\.)*([0-9]|[0-9][0-9\-]*[0-9])\//gm,
+
+                // URL where the hostname is steemit.xxx.xxx
+                /^https?:\/\/steemit\..*\..*\//gm
+            ],
             observer: null,
             tooltip: null,
             observerConfig: {
-                attributes: false,
+                attributes: true,
                 childList: true,
                 subtree: true,
                 characterData: false
             },
             observerTimer: null,
+            externalLinkTooltipText: 'This is an external link, it will take you away from ' + window.location.hostname +'. Think before using your Steemit keys.',
+            suspiciousLinkTooltipText: 'This link looks suspicious and will take you away from ' + window.location.hostname + '. Take extra care before using your Steemit keys.',
 
             initObserver: function() {
                 var body = document.body;
@@ -93,22 +104,51 @@ var contentScript = {
                 contentObject.observer.observe(body, contentObject.observerConfig);
             },
 
-            isBlackListed: function(url) {
-                for(var i=0; i<contentObject.blacklist.length; i++) {
-                    var blDomain = contentObject.blacklist[i];
-                    if (url.indexOf(blDomain) !== -1) {
-                        return true;
+            isWhitelisted: function(url) {
+                if (url.indexOf('http') === 0) {
+                    var baseUrl = url.split('/').slice(0,3).join('/') + '/';
+
+                    for(var i=0; i<contentObject.whitelist.length; i++) {
+                        var wlDomain = contentObject.whitelist[i];
+                        if (baseUrl.indexOf(wlDomain) === 0) {
+                            return true;
+                        }
                     }
                 }
 
                 return false;
             },
 
-            isWhitelisted: function(url) {
-                for(var i=0; i<contentObject.whitelist.length; i++) {
-                    var wlDomain = contentObject.whitelist[i];
-                    if (url.indexOf(wlDomain) !== -1) {
-                        return true;
+            isBlacklisted: function(url) {
+                if (url.indexOf('http') === 0) {
+                    var baseUrl = url.split('/').slice(0,3).join('/') + '/';
+
+                    for(var i=0; i<contentObject.blacklist.length; i++) {
+                        var blDomain = contentObject.blacklist[i];
+                        if (baseUrl.indexOf(blDomain) !== -1) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            },
+
+            isSuspicious: function(url) {
+                for(var i=0; i<contentObject.suspiciousHostnameRegexp.length; i++) {
+                    var regexp = contentObject.suspiciousHostnameRegexp[i];
+                    if (url.match(regexp)) {
+                        var hostname = url.split('/')[2];
+
+                        // If the hostname are IP addresses then don't warn of it is a private IP range
+                        if (
+                            hostname.indexOf("10.") !== 0
+                            && hostname.indexOf("192.168.") !== 0
+                            && hostname.indexOf("172.16.") !== 0
+                        ) {
+                            console.log('Is suspiscious', url, i);
+                            return true;
+                        }
                     }
                 }
 
@@ -133,22 +173,26 @@ var contentScript = {
                         )
                         && !anchor.classList.contains('steemed-phish-checked')  // That was not checked before
                     ) {
-                        var isBlackListed = contentObject.isBlackListed(anchor.href);
-
-                        if (isBlackListed) {
+                        if (contentObject.isBlacklisted(anchor.href) === true) {
                             // If in the blacklist then make it very obvious
 
                             console.log('Steemed Phish: found blacklisted link ', anchor.href);
                             anchor.style.color = "red";
                             anchor.style.textDecoration = "line-through";
                             anchor.innerHTML = "SCAM DETECTED !!" + anchor.innerHTML + "!!";
-                            anchor.classList.add("steemed-phish");
                         } else {
                             // else show a tooltip informing that upon click, they will leave the current site
                             if (
-                                !contentObject.isWhitelisted(anchor.href)   // Skip the tooltip on friendly websites
+                                contentObject.isWhitelisted(anchor.href) === false   // Skip the tooltip on friendly websites
                                 && !anchor.classList.contains('steemed-phish-checked')
                             ) {
+                                console.log(anchor.href, 'not whitelisted');
+                                if(contentObject.isSuspicious(anchor.href)) {
+                                    anchor.style.color = "pink";
+                                    anchor.innerHTML = "!" + anchor.innerHTML + "!";
+                                    anchor.classList.add("steemed-phish-suspicious");
+                                }
+
                                 anchor.title = "";
                                 anchor.addEventListener('mousemove', contentObject.mousemoveHandler);
                                 anchor.addEventListener('mouseout', contentObject.mouseoutHandler);
@@ -156,7 +200,7 @@ var contentScript = {
 
                             // Let see if this is a short URL and what it redirects to
                             if (
-                                !contentObject.isWhitelisted(anchor.href)
+                                contentObject.isWhitelisted(anchor.href) === false
                                 && !anchor.classList.contains('steemed-phish-unshortened')
                             ) {
                                 anchor.classList.add("steemed-phish-unshortening");
@@ -170,7 +214,15 @@ var contentScript = {
             },
 
             mousemoveHandler: function(e) {
-                var tooltip = document.querySelector('.external-link-tooltip');
+                var target = e.target;
+                var tooltip = document.querySelector('#external-link-tooltip');
+
+                if (target.classList.contains('steemed-phish-suspicious')) {
+                    tooltip.innerHTML = contentObject.suspiciousLinkTooltipText;
+                } else {
+                    tooltip.innerHTML = contentObject.externalLinkTooltipText;
+                }
+
                 if (tooltip) {
                     tooltip.style.display = "block";
                     tooltip.style.left = e.pageX + 'px';
@@ -179,7 +231,7 @@ var contentScript = {
             },
 
             mouseoutHandler: function(e) {
-                var tooltip = document.querySelector('.external-link-tooltip');
+                var tooltip = document.querySelector('#external-link-tooltip');
                 if (tooltip) {
                     tooltip.style.display = "none";
                 }
@@ -215,10 +267,12 @@ var contentScript = {
                 // Listening to messages comming from contentScript
                 window.addEventListener('message', contentObject.messageListener);
 
+                console.log(contentObject);
+
                 // Inject the tooltip container
                 var span = document.createElement('span');
-                span.className = "external-link-tooltip";
-                span.innerHTML = 'This link will take you away from this website. Please do not use your Steemit password or keys elsewhere unless you are sure it is a friendly website!';
+                span.id = "external-link-tooltip";
+                span.innerHTML = contentObject.externalLinkTooltipText;
                 document.body.appendChild(span);
 
                 contentObject.checkAnchors();

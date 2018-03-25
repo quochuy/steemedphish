@@ -1,4 +1,8 @@
 # steemedphish
+## v0.0.21
+- blacklist update
+- added regexp for suspicious non blacklisted sites. Trying to find a pattern hostname used by scammers and show an alert if found.
+
 ## v0.0.20
 - not showing the external link warning on friendly websites
 
