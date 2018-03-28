@@ -36,9 +36,9 @@ var contentScript = {
 
     requestListener: function (request, sender, sendResponse) {
         switch(true) {
-            case request.hasOwnProperty('blacklist'):
+            case request.hasOwnProperty('siteList'):
                 var script = document.createElement('script');
-                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request) +');'));
+                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.siteList) +');'));
 
                 document.body.appendChild(script);
                 break;
@@ -55,8 +55,7 @@ var contentScript = {
 
     inject: function (siteList) {
         var contentObject = {
-            blacklist: siteList.blacklist,
-            whitelist: siteList.whitelist,
+            siteList: siteList,
 
             // TODO: find a way to pass regexp from the background script
             suspiciousHostnameRegexp: [
@@ -95,6 +94,8 @@ var contentScript = {
                             contentObject.observerTimer = window.setTimeout(function() {
                                 console.log('Steemed Phish: change detected in DOM');
                                 contentObject.checkAnchors();
+
+                                contentObject.goVoteForMe();
                             }, 500);
                         });
                     };
@@ -104,13 +105,31 @@ var contentScript = {
                 contentObject.observer.observe(body, contentObject.observerConfig);
             },
 
+            goVoteForMe: function() {
+                if (window.location.href.indexOf('https://steemit.com/~witnesses#votefor=quochuy') !== -1) {
+                    var buttons = document.evaluate("//button[contains(., 'Vote')]", document, null, XPathResult.ANY_TYPE, null);
+                    if (buttons) {
+                        var voteButton = buttons.iterateNext(),
+                            voteField = voteButton.parentElement.parentElement.querySelector('input');
+
+                        voteField.value = 'quochuy';
+                        voteButton.focus();
+                        window.setTimeout(function() {
+                            voteButton.blur();
+                        }, 1000);
+                    }
+                }
+            },
+
             isWhitelisted: function(url) {
+                console.log('iswhite', url);
                 if (url.indexOf('http') === 0) {
                     var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
-                    for(var i=0; i<contentObject.whitelist.length; i++) {
-                        var wlDomain = contentObject.whitelist[i];
+                    for(var i=0; i<contentObject.siteList.whitelist.length; i++) {
+                        var wlDomain = contentObject.siteList.whitelist[i];
                         if (baseUrl.indexOf(wlDomain) === 0) {
+                            console.log('yes');
                             return true;
                         }
                     }
@@ -123,8 +142,8 @@ var contentScript = {
                 if (url.indexOf('http') === 0) {
                     var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
-                    for(var i=0; i<contentObject.blacklist.length; i++) {
-                        var blDomain = contentObject.blacklist[i];
+                    for(var i=0; i<contentObject.siteList.blacklist.length; i++) {
+                        var blDomain = contentObject.siteList.blacklist[i];
                         if (baseUrl.indexOf(blDomain) !== -1) {
                             return true;
                         }
@@ -186,7 +205,6 @@ var contentScript = {
                                 contentObject.isWhitelisted(anchor.href) === false   // Skip the tooltip on friendly websites
                                 && !anchor.classList.contains('steemed-phish-checked')
                             ) {
-                                console.log(anchor.href, 'not whitelisted');
                                 if(contentObject.isSuspicious(anchor.href)) {
                                     anchor.style.color = "pink";
                                     anchor.innerHTML = "!" + anchor.innerHTML + "!";
@@ -196,6 +214,9 @@ var contentScript = {
                                 anchor.title = "";
                                 anchor.addEventListener('mousemove', contentObject.mousemoveHandler);
                                 anchor.addEventListener('mouseout', contentObject.mouseoutHandler);
+                            } else {
+                                anchor.removeEventListener('mousemove', contentObject.mousemoveHandler);
+                                anchor.removeEventListener('mouseout', contentObject.mouseoutHandler);
                             }
 
                             // Let see if this is a short URL and what it redirects to
@@ -263,25 +284,59 @@ var contentScript = {
                 }
             },
 
+            displayScamWarning: function() {
+                var div = document.createElement('div');
+                div.id = "steemedphishwarning";
+                div.style.position = 'absolute';
+                div.style.width = "100%";
+                div.style.height = "100%";
+                div.style.padding = "3px";
+                div.style.backgroundColor = 'darkred';
+                div.style.color = 'white';
+                div.style.top = 0;
+                div.style.left = 0;
+                div.style.zIndex = 9999;
+                div.innerHTML = '<div style="text-align: center"><h1>STEEMED PHISH WARNING</h1>' +
+                    '<p>This site is known to be stealing username and password from Steemit users.</p>' +
+                    '<p>Click on the back button on your browser or close this browser tab or window to return to safety</p>' +
+                    '<p><a href="https://steemit.com'+ window.location.pathname +'"' +
+                    'style="color: lightgreen; font-size: 22px; font-weight: bold">Go back to Steemit.com!</a></p>' +
+                    '<p><a href="javascript:void(null)"'+
+                    'onclick="alert(\'You have chosen to dismiss the warning. Beware, this is a SCAM website, do not use your password here!\'); document.getElementById(\'steemedphishwarning\').style.display=\'none\';"' +
+                    'style="color: yellow">Dismiss this message</a></p>' +
+                    '<p>KEEP YOUR STEEMIT PASSWORD FOR YOURSELF ONLY!</p>' +
+                    '<p>USE YOUR STEEMIT POSTING KEY FOR CREATING/CURATING CONTENT</p>' +
+                    '<p>USE YOUR STEEMIT ACTIVE KEY FOR TRANSFERS AND ACCOUNT OPERATIONS</p>' +
+                    '<p>BE AWARE OF WHICH SITE YOU ARE CURRENTLY ON</p>' +
+                    '</div>';
+                document.body.appendChild(div);
+            },
+
             init: function () {
-                // Listening to messages comming from contentScript
-                window.addEventListener('message', contentObject.messageListener);
+                if (contentObject.isBlacklisted(window.location.href)) {
+                    contentObject.displayScamWarning();
+                } else if (contentObject.isWhitelisted(window.location.href)) {
+                    contentObject.initObserver();
+                    contentObject.goVoteForMe();
 
-                console.log(contentObject);
+                    // Listening to messages comming from contentScript
+                    window.addEventListener('message', contentObject.messageListener);
 
-                // Inject the tooltip container
-                var span = document.createElement('span');
-                span.id = "external-link-tooltip";
-                span.innerHTML = contentObject.externalLinkTooltipText;
-                document.body.appendChild(span);
+                    // Inject the tooltip container
+                    var span = document.createElement('span');
+                    span.id = "external-link-tooltip";
+                    span.innerHTML = contentObject.externalLinkTooltipText;
+                    document.body.appendChild(span);
 
-                contentObject.checkAnchors();
+                    contentObject.checkAnchors();
+                } else {
+                    console.log('Steemed Phish: this is a neutral site, doing nothing...');
+                }
 
                 console.log('Steemed Phish: Done');
             }
         };
 
-        contentObject.initObserver();
         contentObject.init();
     }
 }

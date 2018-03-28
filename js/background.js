@@ -2,62 +2,65 @@ var background = {
     alertMessage: 'One of your browser tabs has landed on a Steemit SCAM website: ',
     alertSuspiciousMessage: 'One of your browser tabs has landed on a suspicious website. It is not a blacklisted website but looks suspicious. Be careful before using your Steemit keys: ',
 
-    whitelist: [
-        "https://steemit.com/",
-        "https://busy.org/",
-        "https://beta.chainbb.com/",
-        "https://steemitstage.com/",
-        "https://mspsteem.com/",
-        "https://utopian.io/",
-        "https://d.tube/",
-        "https://dsound.audio/",
-        "https://steemconnect.com/",
-        "https://steemit.chat/",
-        "https://steem.chat/",
-        "https://steemtools.com/",
-        "https://thesteemitshop.com/",
-        "https://developers.steem.io/",
-        "https://steem.io/",
-        "https://smt.steem.io/",
-        "https://steemkr.com/",
-        "https://yehey.org/",
-        "https://steemitstage.com/",
-        "https://steemd.com/",
-        "https://steemdb.com/",
-        "http://www.steemschool.net/",
-        "https://ipfs.io",
-        "https://dlive.io",
-        "https://discord.gg",
-        "https://steemworld.org",
-        "https://discordapp.com",
-        "https://steemnow.com",
+    siteList: {
+        whitelist: [
+            "https://steemit.com/",
+            "https://busy.org/",
+            "https://beta.chainbb.com/",
+            "https://steemitstage.com/",
+            "https://mspsteem.com/",
+            "https://utopian.io/",
+            "https://d.tube/",
+            "https://dsound.audio/",
+            "https://steemconnect.com/",
+            "https://steemit.chat/",
+            "https://steem.chat/",
+            "https://steemtools.com/",
+            "https://thesteemitshop.com/",
+            "https://developers.steem.io/",
+            "https://steem.io/",
+            "https://smt.steem.io/",
+            "https://steemkr.com/",
+            "https://yehey.org/",
+            "https://steemitstage.com/",
+            "https://steemd.com/",
+            "https://steemdb.com/",
+            "http://www.steemschool.net/",
+            "https://ipfs.io",
+            "https://dlive.io",
+            "https://discord.gg",
+            "https://steemworld.org",
+            "https://discordapp.com",
+            "https://steemnow.com",
 
-        // Image storage
-        "staticflickr.com",
-        "steemit-production-imageproxy-upload.s3.amazonaws.com",
-        "ipfs.busy.org"
-    ],
+            // Image storage
+            "staticflickr.com",
+            "steemit-production-imageproxy-upload.s3.amazonaws.com",
+            "ipfs.busy.org"
+        ],
 
-    blacklist: [
-        "steewit.com",
-        "steemil.com",
-        "sleemit.com",
-        "steemitfollowup.ml",
-        "steemitfollowup.com",
-        "steemitfollowup.ga",
-        "steemitfollowup.cf",
-        "steemitfollowup.gq",
-        "steemit.000webhostapp.com",
-        "autosteemit.wapka.mobi",
-        "autosteemer.com",
-        "steemconnect.ml",
-        "steemiit.tk",
-        "stemit.com",
-        "șteemit.com",
-        "steeemit.ml",
-        "steamit.ga",
-        "steemit.aba.ae"
-    ],
+        blacklist: [
+            "steewit.com",
+            "steemil.com",
+            "sleemit.com",
+            "steemitfollowup.ml",
+            "steemitfollowup.com",
+            "steemitfollowup.ga",
+            "steemitfollowup.cf",
+            "steemitfollowup.gq",
+            "steemit.000webhostapp.com",
+            "autosteemit.wapka.mobi",
+            "autosteemer.com",
+            "steemconnect.ml",
+            "steemiit.tk",
+            "stemit.com",
+            "șteemit.com",
+            "steeemit.ml",
+            "steamit.ga",
+            "steemit.aba.ae",
+            "autosteem.info"
+        ]
+    },
 
     suspiciousHostnameRegexp: [
         // URL where the hostname is just an IP address
@@ -70,6 +73,8 @@ var background = {
     alertDisplayed: false,
 
     init: function() {
+        background.fetchSiteList(background.updateSiteList);
+
         chrome.extension.onRequest.addListener(background.requestListener);
 
         chrome.tabs.onActivated.addListener(function(info){
@@ -110,8 +115,7 @@ var background = {
                 switch(true) {
                     case request.hasOwnProperty('getSiteLists'):
                         chrome.tabs.sendRequest(activeTabId, {
-                            blacklist: background.blacklist,
-                            whitelist: background.whitelist
+                            siteList: background.siteList
                         }, function (response) {});
                         break;
 
@@ -168,8 +172,8 @@ var background = {
         if (url.indexOf('http') === 0) {
             var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
-            for(var i=0; i<background.whitelist.length; i++) {
-                var wlDomain = background.whitelist[i];
+            for(var i=0; i<background.siteList.whitelist.length; i++) {
+                var wlDomain = background.siteList.whitelist[i];
                 if (baseUrl.indexOf(wlDomain) === 0) {
                     return true;
                 }
@@ -183,8 +187,8 @@ var background = {
         if (url.indexOf('http') === 0) {
             var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
-            for(var i=0; i<background.blacklist.length; i++) {
-                var blDomain = background.blacklist[i];
+            for(var i=0; i<background.siteList.blacklist.length; i++) {
+                var blDomain = background.siteList.blacklist[i];
                 if (baseUrl.indexOf(blDomain) !== -1) {
                     return true;
                 }
@@ -212,6 +216,34 @@ var background = {
         }
 
         return false;
+    },
+
+    fetchSiteList: function(callback) {
+        var http = new XMLHttpRequest();
+        http.open('GET', 'https://tools.steemulant.com/steemed-phish/conf/siteList.json');
+        http.onreadystatechange = function() {
+            if (this.status == 200) {
+                callback(http.responseText);
+            } else {
+                console.log(this.status);
+                if (window.localStorage.hasOwnProperty('steemedPhishSiteList')) {
+                    background.updateSiteList(window.localStorage.getItem('steemedPhishSiteList'));
+                }
+            }
+        };
+        http.send();
+    },
+
+    updateSiteList: function(payload) {
+        if (payload) {
+            window.localStorage.setItem('steemedPhishSiteList', payload);
+            try {
+                payload = JSON.parse(payload);
+                background.siteList = payload;
+            } catch(e) {
+                console.error("error", e);
+            }
+        }
     }
 };
 

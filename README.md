@@ -1,4 +1,8 @@
 # steemedphish
+## v0.0.22
+- better way to handle blacklist and whitelist
+-
+
 ## v0.0.21
 - blacklist update
 - added regexp for suspicious non blacklisted sites. Trying to find a pattern hostname used by scammers and show an alert if found.
