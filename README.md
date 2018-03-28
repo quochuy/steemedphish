@@ -1,7 +1,21 @@
 # steemedphish
+## v0.0.22
+- better way to handle blacklist and whitelist
+- update the popup
+
+## v0.0.21
+- blacklist update
+- added regexp for suspicious non blacklisted sites. Trying to find a pattern hostname used by scammers and show an alert if found.
+
+## v0.0.20
+- not showing the external link warning on friendly websites
+
 ## v0.0.19
 - blacklist update
 - unshorten URL from links and check them against black lists
+
+## v0.0.17 & v0.0.18
+- fix a bug that conflicted with Steemit login button
 
 ## v0.0.16
 - the external link marker is now purple instead of read to not be confused with a scam link that is also red

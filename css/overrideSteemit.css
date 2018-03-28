@@ -8,14 +8,14 @@ a[rel="noopener"].steemed-phish-unshortening:after, a[rel="nofollow noopener"].s
     animation: spinner .8s ease infinite;
 }
 
-.external-link-tooltip {
+#external-link-tooltip {
     display: none;
     margin-left: 28px;
     padding: 10px;
     position: absolute;
     z-index: 1000;
-    width:200px;
-    height:100px;
+    width: 200px;
+    height: 85px;
     background-color: #fbeeff;
     border: solid 1px #f6d8ff;
     border-radius: 3px;

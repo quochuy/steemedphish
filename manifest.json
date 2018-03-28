@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Steemed Phish",
     "description": "A Chrome extension that will warn you if you are being lured into a fake Steemit website.",
-    "version": "0.0.19",
+    "version": "0.0.22",
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "permissions": [
         "tabs",
@@ -25,49 +25,13 @@
         {
             "run_at": "document_start",
             "matches": [
-                "*://steemit.com/*",
-                "*://busy.org/*",
-                "*://beta.chainbb.com/*",
-                "*://steemitstage.com/*",
-                "*://mspsteem.com/*",
-                "*://utopian.io/*",
-                "*://d.tube/*",
-                "*://dsound.audio/*",
-                "*://steemtools.com/*",
-                "*://steemkr.com/*",
-                "*://yehey.org/*",
-                "*://steemitstage.com/*"
+                "*://*/*"
             ],
             "css": [
                 "css/overrideSteemit.css"
             ],
             "js": [
                 "js/content.js"
-            ]
-        },
-
-        {
-            "run_at": "document_end",
-            "matches": [
-                "*://*.steemil.com/*",
-                "*://*.steewit.com/*",
-                "*://*.sleemit.com/*",
-                "*://*.steemitfollowup.ml/*",
-                "*://*.steemitfollowup.com/*",
-                "*://*.steemitfollowup.ga/*",
-                "*://*.steemitfollowup.cf/*",
-                "*://*.steemitfollowup.gq/*",
-                "*://steemit.000webhostapp.com/*",
-                "*://autosteemit.wapka.mobi/*",
-                "*://*.autosteemer.com/*",
-                "*://*.steemconnect.ml/*",
-                "*://*.steemiit.tk/*",
-                "*://*.stemit.com/*",
-                "*://*.șteemit.com/*",
-                "*://*.steeemit.ml/*"
-            ],
-            "js": [
-                "js/content-blacklist.js"
             ]
         }
     ]
