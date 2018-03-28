@@ -1,7 +1,7 @@
 # steemedphish
 ## v0.0.22
 - better way to handle blacklist and whitelist
--
+- update the popup
 
 ## v0.0.21
 - blacklist update
