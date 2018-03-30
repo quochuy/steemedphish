@@ -1,4 +1,7 @@
 # steemedphish
+## v0.0.24
+- added own URL expander that works better with services such as https://t.co
+
 ## v0.0.23
 - better way to handle blacklist and whitelist
 - update the popup

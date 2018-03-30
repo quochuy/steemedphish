@@ -94,7 +94,7 @@ var background = {
 
     unshortenUrl: function (url, callback) {
         var http = new XMLHttpRequest();
-        http.open('GET', 'http://expandurl.com/api/v1/?url=' + encodeURIComponent(url));
+        http.open('GET', 'https://tools.steemulant.com/api/unshorten.php?url=' + encodeURIComponent(url));
         http.onreadystatechange = function() {
             if (this.status == 200) {
                 callback(url, http.responseText);
@@ -111,7 +111,7 @@ var background = {
             var activeTab = arrayOfTabs[0];
             var activeTabId = activeTab.id; // or do whatever you need
 
-            if (activeTabId == sender.tab.id) {
+            if (activeTabId && activeTabId == sender.tab.id) {
                 switch(true) {
                     case request.hasOwnProperty('getSiteLists'):
                         chrome.tabs.sendRequest(activeTabId, {
