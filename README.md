@@ -1,3 +1,40 @@
+## Steemed Phish - Chrome extension that offers protection against Steemit phishing clones
+### Features
+#### Changing icon color based on white/blacklist
+This extension will validate Steemit related websites by changing its icon color:
+ - red is for blacklisted sites
+ - green is for recognised friendly sites
+ - grey is for unrecognised sites
+
+#### Whitelist and blacklist
+Steemed Phish does not rely solely on these list as anything not listed won't be protected. Blacklist and whitelist are hard to maintain but adding them helps widening the protection coverage.
+
+When a site is neither whitelisted or blacklisted, Steemed Phish will try to check the URL structure to find known patterns and flag a link as supsicious by coloring it in pink.
+
+There are currently 19 blacklisted websites and 31 whitelisted websites.
+#### Phishing Alerts
+If a user lands on a phishing website, Steemed Phish will display two types of alerts:
+- a dialog that shows up even if the page was loaded in a tab in the background
+- a full page alert, that covers the whole phishing page and offers a link to go back to Steemit.com. The full page alert also reminds the user of not using their Steemit Keys on unknown websites and keep their password (Owner Key) safe.
+
+#### Expand shorten URL
+Some links are shortened using services such as bit.ly, this prevents people from easily analysing the URL of the link. Steemed Phish uses a link expanding API to determine the destination URL of a link and then compare it again against the white/blacklist logic above.
+
+#### Making external links more visible
+Ideally, a user should be more careful on links they are clicking on by always paying attention to the URL of an anchor. But this is easier said than done and even the most experienced user can let down their guard sometimes and get tricked by the scammers.
+
+Recently, Steemit.com, has added a feature that marks external links with a grey icon on the right of each links. Steemed Phish will make that icon more obvious by coloring it in purple. On top of that, it will make a bubble appear next to the mouse cursor with a text explaining the fact that clicking on the link with leads you away so don't use your password. This bubble won't show up on friendly (whitelisted) websites
+
+### Roadmap and potential ideas
+- make a bot that browses steemit for reports and extract URLs to be added to the blacklist
+- make a bot that follows another bot (@guard) and listens for its downvotes and update the blacklist accordingly
+- monitor the https://steem.chat/channel/steemitabuse channel for more URls to be added to the blacklist
+- If Steem Guard project goes live, use its API to update the blacklist: https://steemit.com/steem/@hernandev/proposal-steemguard-phishing-and-scam-protection-tools(edited)
+
+### Download the extension
+To download and use the extension, just head to the Google Webstore:
+https://chrome.google.com/webstore/detail/steemed-phish/eiaigalhddmmpdnehcigmlmgllomljgj
+
 # steemedphish
 ## v0.0.23
 - better way to handle blacklist and whitelist
