@@ -59,7 +59,7 @@ var contentScript = {
             observer: null,
             tooltip: null,
             observerConfig: {
-                attributes: true,
+                attributes: false,
                 childList: true,
                 subtree: true,
                 characterData: false
@@ -113,14 +113,13 @@ var contentScript = {
             },
 
             isWhitelisted: function(url) {
-                console.log('iswhite', url);
                 if (url.indexOf('http') === 0) {
                     var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
                     for(var i=0; i<contentObject.siteList.whitelist.length; i++) {
-                        var wlDomain = contentObject.siteList.whitelist[i];
-                        if (baseUrl.indexOf(wlDomain) === 0) {
-                            console.log('yes');
+                        var entry = contentObject.siteList.whitelist[i];
+                        var regexp = new RegExp(entry, 'gi');
+                        if (baseUrl.match(regexp)) {
                             return true;
                         }
                     }

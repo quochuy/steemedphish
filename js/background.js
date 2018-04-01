@@ -94,17 +94,6 @@ var background = {
                     }, 15000);
                 }
             } else {
-                if (background.isSuspicious(url)) {
-                    if (background.alertDisplayed === false) {
-                        background.alertDisplayed = true;
-                        alert(background.alertSuspiciousMessage + url);
-
-                        setTimeout(function() {
-                            background.alertDisplayed = false;
-                        }, 15000);
-                    }
-
-                }
                 chrome.browserAction.setIcon({path: '../images/icon2-48-grey.png', tabId: tabId});
             }
         }
@@ -115,8 +104,9 @@ var background = {
             var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
             for(var i=0; i<background.siteList.whitelist.length; i++) {
-                var wlDomain = background.siteList.whitelist[i];
-                if (baseUrl.indexOf(wlDomain) === 0) {
+                var entry = background.siteList.whitelist[i];
+                var regexp = new RegExp(entry, 'gi');
+                if (baseUrl.match(regexp)) {
                     return true;
                 }
             }
@@ -165,12 +155,12 @@ var background = {
 
     fetchSiteList: function(callback) {
         var http = new XMLHttpRequest();
-        http.open('GET', 'https://tools.steemulant.com/steemed-phish/conf/siteList.v2.json');
+        var now = new Date().getTime();
+        http.open('GET', 'https://tools.steemulant.com/steemed-phish/conf/siteList.v2.json?ord=' + now);
         http.onreadystatechange = function() {
             if (this.status == 200) {
                 callback(http.responseText);
             } else {
-                console.log(this.status);
                 if (window.localStorage.hasOwnProperty('steemedPhishSiteList')) {
                     background.updateSiteList(window.localStorage.getItem('steemedPhishSiteList'));
                 }
