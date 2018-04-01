@@ -56,19 +56,10 @@ var contentScript = {
     inject: function (siteList) {
         var contentObject = {
             siteList: siteList,
-
-            // TODO: find a way to pass regexp from the background script
-            suspiciousHostnameRegexp: [
-                // URL where the hostname is just an IP address
-                /^https?:\/\/(([0-9]|[0-9][0-9\-]*[0-9])\.)*([0-9]|[0-9][0-9\-]*[0-9])\//gm,
-
-                // URL where the hostname is steemit.xxx.xxx
-                /^https?:\/\/steemit\..*\..*\//gm
-            ],
             observer: null,
             tooltip: null,
             observerConfig: {
-                attributes: false,
+                attributes: true,
                 childList: true,
                 subtree: true,
                 characterData: false
@@ -143,8 +134,9 @@ var contentScript = {
                     var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
                     for(var i=0; i<contentObject.siteList.blacklist.length; i++) {
-                        var blDomain = contentObject.siteList.blacklist[i];
-                        if (baseUrl.indexOf(blDomain) !== -1) {
+                        var entry = contentObject.siteList.blacklist[i];
+                        var regexp = new RegExp(entry, 'gi');
+                        if (baseUrl.match(regexp)) {
                             return true;
                         }
                     }
@@ -154,18 +146,19 @@ var contentScript = {
             },
 
             isSuspicious: function(url) {
-                for(var i=0; i<contentObject.suspiciousHostnameRegexp.length; i++) {
-                    var regexp = contentObject.suspiciousHostnameRegexp[i];
+                for(var i=0; i<contentObject.siteList.suspicious.length; i++) {
+                    var entry = contentObject.siteList.suspicious[i];
+                    var regexp = new RegExp(entry.regexp, entry.modifier);
+
                     if (url.match(regexp)) {
                         var hostname = url.split('/')[2];
 
-                        // If the hostname are IP addresses then don't warn of it is a private IP range
+                        // If the hostname are IP addresses then don't warn if it is a private IP range
                         if (
                             hostname.indexOf("10.") !== 0
                             && hostname.indexOf("192.168.") !== 0
                             && hostname.indexOf("172.16.") !== 0
                         ) {
-                            console.log('Is suspiscious', url, i);
                             return true;
                         }
                     }
@@ -205,7 +198,10 @@ var contentScript = {
                                 contentObject.isWhitelisted(anchor.href) === false   // Skip the tooltip on friendly websites
                                 && !anchor.classList.contains('steemed-phish-checked')
                             ) {
-                                if(contentObject.isSuspicious(anchor.href)) {
+                                if(
+                                    !anchor.classList.contains("steemed-phish-suspicious")
+                                    && contentObject.isSuspicious(anchor.href)
+                                ) {
                                     anchor.style.color = "pink";
                                     anchor.innerHTML = "!" + anchor.innerHTML + "!";
                                     anchor.classList.add("steemed-phish-suspicious");

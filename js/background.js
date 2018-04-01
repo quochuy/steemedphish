@@ -3,77 +3,19 @@ var background = {
     alertSuspiciousMessage: 'One of your browser tabs has landed on a suspicious website. It is not a blacklisted website but looks suspicious. Be careful before using your Steemit keys: ',
 
     siteList: {
-        whitelist: [
-            "https://steemit.com/",
-            "https://busy.org/",
-            "https://beta.chainbb.com/",
-            "https://steemitstage.com/",
-            "https://mspsteem.com/",
-            "https://utopian.io/",
-            "https://d.tube/",
-            "https://dsound.audio/",
-            "https://steemconnect.com/",
-            "https://steemit.chat/",
-            "https://steem.chat/",
-            "https://steemtools.com/",
-            "https://thesteemitshop.com/",
-            "https://developers.steem.io/",
-            "https://steem.io/",
-            "https://smt.steem.io/",
-            "https://steemkr.com/",
-            "https://yehey.org/",
-            "https://steemitstage.com/",
-            "https://steemd.com/",
-            "https://steemdb.com/",
-            "http://www.steemschool.net/",
-            "https://ipfs.io",
-            "https://dlive.io",
-            "https://discord.gg",
-            "https://steemworld.org",
-            "https://discordapp.com",
-            "https://steemnow.com",
-
-            // Image storage
-            "staticflickr.com",
-            "steemit-production-imageproxy-upload.s3.amazonaws.com",
-            "ipfs.busy.org"
-        ],
-
-        blacklist: [
-            "steewit.com",
-            "steemil.com",
-            "sleemit.com",
-            "steemitfollowup.ml",
-            "steemitfollowup.com",
-            "steemitfollowup.ga",
-            "steemitfollowup.cf",
-            "steemitfollowup.gq",
-            "steemit.000webhostapp.com",
-            "autosteemit.wapka.mobi",
-            "autosteemer.com",
-            "steemconnect.ml",
-            "steemiit.tk",
-            "stemit.com",
-            "șteemit.com",
-            "steeemit.ml",
-            "steamit.ga",
-            "steemit.aba.ae",
-            "autosteem.info"
-        ]
+        whitelist: [],
+        blacklist: [],
+        suspicious: []
     },
-
-    suspiciousHostnameRegexp: [
-        // URL where the hostname is just an IP address
-        /^https?:\/\/(([0-9]|[0-9][0-9\-]*[0-9])\.)*([0-9]|[0-9][0-9\-]*[0-9])\//gm,
-
-        // URL where the hostname is steemit.xxx.xxx
-        /^https?:\/\/steemit\..*\..*\//gm
-    ],
 
     alertDisplayed: false,
 
     init: function() {
         background.fetchSiteList(background.updateSiteList);
+
+        setInterval(function() {
+            background.fetchSiteList(background.updateSiteList);
+        }, 2  * 3600 * 1000);
 
         chrome.extension.onRequest.addListener(background.requestListener);
 
@@ -188,8 +130,9 @@ var background = {
             var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
             for(var i=0; i<background.siteList.blacklist.length; i++) {
-                var blDomain = background.siteList.blacklist[i];
-                if (baseUrl.indexOf(blDomain) !== -1) {
+                var entry = background.siteList.blacklist[i];
+                var regexp = new RegExp(entry, 'gi');
+                if (baseUrl.match(regexp)) {
                     return true;
                 }
             }
@@ -199,8 +142,10 @@ var background = {
     },
 
     isSuspicious: function(url) {
-        for(var i=0; i<background.suspiciousHostnameRegexp.length; i++) {
-            var regexp = background.suspiciousHostnameRegexp[i];
+        for(var i=0; i<background.siteList.suspicious.length; i++) {
+            var entry = background.siteList.suspicious[i];
+            var regexp = new RegExp(entry.regexp, entry.modifier);
+
             if (url.match(regexp)) {
                 var hostname = url.split('/')[2];
 
@@ -220,7 +165,7 @@ var background = {
 
     fetchSiteList: function(callback) {
         var http = new XMLHttpRequest();
-        http.open('GET', 'https://tools.steemulant.com/steemed-phish/conf/siteList.json');
+        http.open('GET', 'https://tools.steemulant.com/steemed-phish/conf/siteList.v2.json');
         http.onreadystatechange = function() {
             if (this.status == 200) {
                 callback(http.responseText);
