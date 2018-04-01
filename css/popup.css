@@ -1,4 +1,29 @@
 body.popup {
     min-width: 430px;
     overflow-x: hidden;
+    background-image: url(../images/popup-bg.jpg);
+}
+
+h1 {
+    background-color: rgba(255, 255, 255, 0.50);
+    padding: 7px;
+}
+
+img.logo128 {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+.description {
+    width: 85%
+}
+
+hr {
+    border-top: dotted 1px;
+    border-bottom: none;
+}
+
+a.credits {
+    font-size: 9px;
 }
