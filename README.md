@@ -36,6 +36,10 @@ To download and use the extension, just head to the Google Webstore:
 https://chrome.google.com/webstore/detail/steemed-phish/eiaigalhddmmpdnehcigmlmgllomljgj
 
 # steemedphish
+## v0.0.26
+- fix whitelist bug
+- adding cache buster to siteList.json URL
+
 ## v0.0.25
 - updated the popup screen
 - use of regexp for blacklist and whitelist
