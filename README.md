@@ -36,6 +36,10 @@ To download and use the extension, just head to the Google Webstore:
 https://chrome.google.com/webstore/detail/steemed-phish/eiaigalhddmmpdnehcigmlmgllomljgj
 
 # steemedphish
+## v0.0.25
+- updated the popup screen
+- use of regexp for blacklist and whitelist
+
 ## v0.0.24
 - added own URL expander that works better with services such as https://t.co
 
