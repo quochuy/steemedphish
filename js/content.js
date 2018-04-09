@@ -316,7 +316,12 @@ var contentScript = {
                     '</div>';
 
 
-                document.body.appendChild(div);
+                if (document.body.tagName === 'FRAMESET') {
+                   document.body.parentNode.appendChild(div);
+                } else {
+                    document.body.appendChild(div);
+                }
+
             },
 
             init: function () {
