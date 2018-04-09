@@ -36,6 +36,18 @@ To download and use the extension, just head to the Google Webstore:
 https://chrome.google.com/webstore/detail/steemed-phish/eiaigalhddmmpdnehcigmlmgllomljgj
 
 # steemedphish
+## v0.0.28
+- improve full page alert within iframes when no body tag is found
+- improve URL unshortening script
+
+## v0.0.27
+- improve detection within iframes
+- fix bug with logic running on neutral sites
+
+## v0.0.26
+- fix whitelist bug
+- adding cache buster to siteList.json URL
+
 ## v0.0.25
 - updated the popup screen
 - use of regexp for blacklist and whitelist

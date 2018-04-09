@@ -55,11 +55,12 @@ var contentScript = {
 
     inject: function (siteList) {
         var contentObject = {
+            initialized: false,
             siteList: siteList,
             observer: null,
             tooltip: null,
             observerConfig: {
-                attributes: true,
+                attributes: false,
                 childList: true,
                 subtree: true,
                 characterData: false
@@ -113,14 +114,13 @@ var contentScript = {
             },
 
             isWhitelisted: function(url) {
-                console.log('iswhite', url);
                 if (url.indexOf('http') === 0) {
                     var baseUrl = url.split('/').slice(0,3).join('/') + '/';
 
                     for(var i=0; i<contentObject.siteList.whitelist.length; i++) {
-                        var wlDomain = contentObject.siteList.whitelist[i];
-                        if (baseUrl.indexOf(wlDomain) === 0) {
-                            console.log('yes');
+                        var entry = contentObject.siteList.whitelist[i];
+                        var regexp = new RegExp(entry, 'gi');
+                        if (baseUrl.match(regexp)) {
                             return true;
                         }
                     }
@@ -135,6 +135,22 @@ var contentScript = {
 
                     for(var i=0; i<contentObject.siteList.blacklist.length; i++) {
                         var entry = contentObject.siteList.blacklist[i];
+                        var regexp = new RegExp(entry, 'gi');
+                        if (baseUrl.match(regexp)) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            },
+
+            isBypass: function(url) {
+                if (url.indexOf('http') === 0) {
+                    var baseUrl = url.split('/').slice(0,3).join('/') + '/';
+
+                    for(var i=0; i<contentObject.siteList.bypass.length; i++) {
+                        var entry = contentObject.siteList.bypass[i];
                         var regexp = new RegExp(entry, 'gi');
                         if (baseUrl.match(regexp)) {
                             return true;
@@ -196,6 +212,7 @@ var contentScript = {
                             // else show a tooltip informing that upon click, they will leave the current site
                             if (
                                 contentObject.isWhitelisted(anchor.href) === false   // Skip the tooltip on friendly websites
+                                && contentObject.isBypass(anchor.href) === false
                                 && !anchor.classList.contains('steemed-phish-checked')
                             ) {
                                 if(
@@ -218,6 +235,7 @@ var contentScript = {
                             // Let see if this is a short URL and what it redirects to
                             if (
                                 contentObject.isWhitelisted(anchor.href) === false
+                                && contentObject.isBypass(anchor.href) === false
                                 && !anchor.classList.contains('steemed-phish-unshortened')
                             ) {
                                 anchor.classList.add("steemed-phish-unshortening");
@@ -283,18 +301,9 @@ var contentScript = {
             displayScamWarning: function() {
                 var div = document.createElement('div');
                 div.id = "steemedphishwarning";
-                div.style.position = 'absolute';
-                div.style.width = "100%";
-                div.style.height = "100%";
-                div.style.padding = "3px";
-                div.style.backgroundColor = 'darkred';
-                div.style.color = 'white';
-                div.style.top = 0;
-                div.style.left = 0;
-                div.style.zIndex = 9999;
-                div.innerHTML = '<div style="text-align: center"><h1>STEEMED PHISH WARNING</h1>' +
+                div.innerHTML = '<div><h2>STEEMED PHISH WARNING</h2>' +
                     '<p>This site is known to be stealing username and password from Steemit users.</p>' +
-                    '<p>Click on the back button on your browser or close this browser tab or window to return to safety</p>' +
+                    '<p>Close this browser tab or window to return to safety.</p>' +
                     '<p><a href="https://steemit.com'+ window.location.pathname +'"' +
                     'style="color: lightgreen; font-size: 22px; font-weight: bold">Go back to Steemit.com!</a></p>' +
                     '<p><a href="javascript:void(null)"'+
@@ -305,7 +314,14 @@ var contentScript = {
                     '<p>USE YOUR STEEMIT ACTIVE KEY FOR TRANSFERS AND ACCOUNT OPERATIONS</p>' +
                     '<p>BE AWARE OF WHICH SITE YOU ARE CURRENTLY ON</p>' +
                     '</div>';
-                document.body.appendChild(div);
+
+
+                if (document.body.tagName === 'FRAMESET') {
+                   document.body.parentNode.appendChild(div);
+                } else {
+                    document.body.appendChild(div);
+                }
+
             },
 
             init: function () {
@@ -326,7 +342,7 @@ var contentScript = {
 
                     contentObject.checkAnchors();
                 } else {
-                    console.log('Steemed Phish: this is a neutral site, doing nothing...');
+                    console.log('Steemed Phish: this is a neutral site, doing nothing... ' + window.location.href);
                 }
 
                 console.log('Steemed Phish: Done');

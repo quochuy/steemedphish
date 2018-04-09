@@ -27,3 +27,33 @@ a[rel="noopener"].steemed-phish-unshortening:after, a[rel="nofollow noopener"].s
 @keyframes spinner {
   to {transform: rotate(360deg);}
 }
+
+#steemedphishwarning {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 3px;
+    background-color : darkred;
+    color: white;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+#steemedphishwarning h1,
+#steemedphishwarning h2 {
+    color: white !important;
+    text-align: center !important;
+}
+
+#steemedphishwarning p,
+#steemedphishwarning div,
+#steemedphishwarning h2 {
+    color: #dddddd;
+    text-align: center !important;
+}
+
+#steemedphishwarning p {
+    margin: 14px;
+    text-align: center !important;
+}
