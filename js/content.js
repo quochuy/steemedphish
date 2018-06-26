@@ -4,7 +4,7 @@ var contentScript = {
     devtoolsPanelReady: false,
 
     init: function () {
-        console.log('Steemed Phish: init content script...');
+        console.log('Steemed Phish: init content script...', window.location.href);
 
         // Listening to messages coming from the injected script (contentObject)
         window.addEventListener('message', contentScript.messageListener);
@@ -342,10 +342,10 @@ var contentScript = {
 
                     contentObject.checkAnchors();
                 } else {
-                    console.log('Steemed Phish: this is a neutral site, doing nothing... ' + window.location.href);
+                    // console.log('Steemed Phish: this is a neutral site, doing nothing... ' + window.location.href);
                 }
 
-                console.log('Steemed Phish: Done');
+                // console.log('Steemed Phish: Done');
             }
         };
 

@@ -51,24 +51,25 @@ var background = {
             // since only one tab should be active and in the current window at once
             // the return variable should only have one entry
             var activeTab = arrayOfTabs[0];
-            var activeTabId = activeTab.id; // or do whatever you need
+            if (typeof activeTab !== "undefined" && activeTab.hasOwnProperty('id')) {
+              var activeTabId = activeTab.id; // or do whatever you need
 
-            if (activeTabId && activeTabId == sender.tab.id) {
+              if (activeTabId && activeTabId == sender.tab.id) {
                 switch(true) {
-                    case request.hasOwnProperty('getSiteLists'):
-                        chrome.tabs.sendRequest(activeTabId, {
-                            siteList: background.siteList
-                        }, function (response) {});
-                        break;
+                  case request.hasOwnProperty('getSiteLists'):
+                    chrome.tabs.sendRequest(activeTabId, {
+                      siteList: background.siteList
+                    }, function (response) {});
+                    break;
 
-                    case request.hasOwnProperty('unshortenUrl'):
-                        background.unshortenUrl(request.unshortenUrl, function(url, longUrl) {
-                            chrome.tabs.sendRequest(activeTabId, {url: url, longUrl: longUrl}, function (response) {});
-                        });
-                        break;
+                  case request.hasOwnProperty('unshortenUrl'):
+                    background.unshortenUrl(request.unshortenUrl, function(url, longUrl) {
+                      chrome.tabs.sendRequest(activeTabId, {url: url, longUrl: longUrl}, function (response) {});
+                    });
+                    break;
                 }
+              }
             }
-
         });
 
         background.listening = false;
@@ -158,9 +159,11 @@ var background = {
         var now = new Date().getTime();
         http.open('GET', 'https://tools.steemulant.com/steemed-phish/conf/siteList.v2.json?ord=' + now);
         http.onreadystatechange = function() {
-            if (this.status == 200) {
+            if (this.readyState === 4 && this.status === 200) {
+                console.log("ok");
                 callback(http.responseText);
             } else {
+              console.log("err", this.status);
                 if (window.localStorage.hasOwnProperty('steemedPhishSiteList')) {
                     background.updateSiteList(window.localStorage.getItem('steemedPhishSiteList'));
                 }
@@ -176,7 +179,7 @@ var background = {
                 payload = JSON.parse(payload);
                 background.siteList = payload;
             } catch(e) {
-                console.error("error", e);
+                console.error("[error]", e);
             }
         }
     }
