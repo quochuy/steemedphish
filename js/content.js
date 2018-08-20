@@ -38,7 +38,7 @@ var contentScript = {
         switch(true) {
             case request.hasOwnProperty('siteList'):
                 var script = document.createElement('script');
-                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.siteList) +');'));
+                script.appendChild(document.createTextNode('(' + contentScript.inject + ')('+ JSON.stringify(request.siteList) +', '+ JSON.stringify(request.steemCleanersSiteList) +');'));
 
                 document.body.appendChild(script);
                 break;
@@ -53,10 +53,11 @@ var contentScript = {
         }
     },
 
-    inject: function (siteList) {
+    inject: function (siteList, steemCleanersSiteList) {
         var contentObject = {
             initialized: false,
             siteList: siteList,
+            steemCleanersSiteList: steemCleanersSiteList,
             observer: null,
             tooltip: null,
             observerConfig: {
@@ -137,6 +138,13 @@ var contentScript = {
                         var entry = contentObject.siteList.blacklist[i];
                         var regexp = new RegExp(entry, 'gi');
                         if (baseUrl.match(regexp)) {
+                            return true;
+                        }
+                    }
+
+                    for(var i=0; i<contentObject.steemCleanersSiteList.length; i++) {
+                        var entry = contentObject.steemCleanersSiteList[i];
+                        if (entry !== '' && baseUrl.indexOf(entry) !== -1) {
                             return true;
                         }
                     }

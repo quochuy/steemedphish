@@ -36,6 +36,9 @@ To download and use the extension, just head to the Google Webstore:
 https://chrome.google.com/webstore/detail/steemed-phish/eiaigalhddmmpdnehcigmlmgllomljgj
 
 # steemedphish
+## v0.0.30
+- added steemcleaners blacklist https://github.com/gryter/plentyofphish/blob/master/phishingurls.txt
+
 ## v0.0.29
 - minor fixes on how the blacklist is loaded
 - more sites added to the blacklist
