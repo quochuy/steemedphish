@@ -57,3 +57,9 @@ a[rel="noopener"].steemed-phish-unshortening:after, a[rel="nofollow noopener"].s
     margin: 14px;
     text-align: center !important;
 }
+
+.Comment__body {
+    border-left: 3px dotted #ededed;
+    padding-left: 5px;
+    padding-bottom: 2px;
+}
