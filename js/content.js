@@ -38,7 +38,15 @@ var contentScript = {
     switch (true) {
       case request.hasOwnProperty('siteList'):
         var script = document.createElement('script');
-        script.appendChild(document.createTextNode('(' + contentScript.inject + ')(' + JSON.stringify(request.siteList) + ', ' + JSON.stringify(request.steemCleanersSiteList) + ');'));
+        var siteList = JSON.stringify(request.siteList);
+        var steemCleanersSiteList = JSON.stringify(request.steemCleanersSiteList);
+        var steemCleanersUserList = JSON.stringify(request.steemCleanersUserList);
+
+        script.appendChild(
+          document.createTextNode(
+            `(${contentScript.inject})(${siteList}, ${steemCleanersSiteList}, ${steemCleanersUserList});`
+          )
+        );
 
         document.body.appendChild(script);
         break;
@@ -53,11 +61,12 @@ var contentScript = {
     }
   },
 
-  inject: function (siteList, steemCleanersSiteList) {
+  inject: function (siteList, steemCleanersSiteList, steemCleanersUserList) {
     var contentObject = {
       initialized: false,
       siteList: siteList,
       steemCleanersSiteList: steemCleanersSiteList,
+      steemCleanersUserList: steemCleanersUserList,
       observer: null,
       tooltip: null,
       observerConfig: {
@@ -87,6 +96,7 @@ var contentScript = {
               contentObject.observerTimer = window.setTimeout(function () {
                 console.log('Steemed Phish: change detected in DOM');
                 contentObject.checkAnchors();
+                contentObject.highlightBlacklistedUsers();
 
                 contentObject.goVoteForMe();
               }, 500);
@@ -111,6 +121,39 @@ var contentScript = {
               voteButton.blur();
             }, 1000);
           }
+        }
+      },
+
+      getAllTextNodes: function(startNode) {
+        var result = [];
+
+        (function scanSubTree(node){
+          if(node.childNodes.length)
+            for(var i = 0; i < node.childNodes.length; i++)
+              scanSubTree(node.childNodes[i]);
+          else if(node.nodeType == Node.TEXT_NODE)
+            result.push(node);
+        })(startNode);
+
+        return result;
+      },
+
+      highlightBlacklistedUsers: function() {
+        var authorNodes = document.getElementsByClassName('Author');
+
+        var regexp = new RegExp("\\b(" + contentObject.steemCleanersUserList.join('|') + ")\\b", 'g');
+
+        for (var ni=0; ni<authorNodes.length; ni++) {
+          var node = authorNodes[ni];
+
+          contentObject.getAllTextNodes(node).forEach(function(node) {
+            if (node.nodeValue.length > 2 && node.nodeValue.indexOf("⚠️") === -1) {
+              node.nodeValue = node.nodeValue.replace(
+                regexp,
+                "⚠️ $1 ⚠️"
+              );
+            }
+          });
         }
       },
 
@@ -349,6 +392,7 @@ var contentScript = {
           document.body.appendChild(span);
 
           contentObject.checkAnchors();
+          contentObject.highlightBlacklistedUsers();
         } else {
           // console.log('Steemed Phish: this is a neutral site, doing nothing... ' + window.location.href);
         }

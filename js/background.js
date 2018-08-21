@@ -9,15 +9,19 @@ var background = {
   },
 
   steemCleanersSiteList: [],
+  steemCleanersUserList: [],
 
   alertDisplayed: false,
 
   init: function () {
     background.fetchSiteList(background.updateSiteList);
-    background.fetchSteemCleanersList(background.updateSteemCleanersList);
+    background.fetchSteemCleanersSiteList(background.updateSteemCleanersSiteList);
+    background.fetchSteemCleanersUserList(background.updateSteemCleanersUserList);
 
     setInterval(function () {
       background.fetchSiteList(background.updateSiteList);
+      background.fetchSteemCleanersSiteList(background.updateSteemCleanersSiteList);
+      background.fetchSteemCleanersUserList(background.updateSteemCleanersUserList);
     }, 2 * 3600 * 1000);
 
     chrome.extension.onRequest.addListener(background.requestListener);
@@ -62,7 +66,8 @@ var background = {
             case request.hasOwnProperty('getSiteLists'):
               chrome.tabs.sendRequest(activeTabId, {
                 siteList: background.siteList,
-                steemCleanersSiteList: background.steemCleanersSiteList
+                steemCleanersSiteList: background.steemCleanersSiteList,
+                steemCleanersUserList: background.steemCleanersUserList
               }, function (response) {
               });
               break;
@@ -172,10 +177,9 @@ var background = {
     http.open('GET', 'https://tools.steemulant.com/steemed-phish/conf/siteList.v2.json?ord=' + now);
     http.onreadystatechange = function () {
       if (this.readyState === 4 && this.status === 200) {
-        console.log("ok");
         callback(http.responseText);
       } else {
-        console.log("err", this.status);
+        console.log("xhr response status", this.status);
         if (window.localStorage.hasOwnProperty('steemedPhishSiteList')) {
           callback(window.localStorage.getItem('steemedPhishSiteList'));
         }
@@ -184,7 +188,7 @@ var background = {
     http.send();
   },
 
-  fetchSteemCleanersList: function (callback) {
+  fetchSteemCleanersSiteList: function (callback) {
     var http = new XMLHttpRequest();
     var now = new Date().getTime();
     http.open('GET', 'https://raw.githubusercontent.com/gryter/plentyofphish/master/phishingurls.txt?ord=' + now);
@@ -196,6 +200,24 @@ var background = {
         console.log("err", this.status);
         if (window.localStorage.hasOwnProperty('steemCleanersSiteList')) {
           callback(window.localStorage.getItem('steemCleanersSiteList'));
+        }
+      }
+    };
+    http.send();
+  },
+
+  fetchSteemCleanersUserList: function (callback) {
+    var http = new XMLHttpRequest();
+    var now = new Date().getTime();
+    http.open('GET', 'https://raw.githubusercontent.com/gryter/plentyofphish/master/phishing.txt?ord=' + now);
+    http.onreadystatechange = function () {
+      if (this.readyState === 4 && this.status === 200) {
+        console.log("ok");
+        callback(http.responseText);
+      } else {
+        console.log("err", this.status);
+        if (window.localStorage.hasOwnProperty('steemCleanersUserList')) {
+          callback(window.localStorage.getItem('steemCleanersUserList'));
         }
       }
     };
@@ -214,17 +236,41 @@ var background = {
     }
   },
 
-  updateSteemCleanersList: function (payload) {
+  updateSteemCleanersSiteList: function (payload) {
     if (payload) {
+      payload = payload.replace(/\n$/, "");
       window.localStorage.setItem('steemCleanersSiteList', payload);
 
       try {
-        background.steemCleanersSiteList = payload.split("\n");
+        const sites = payload.split("\n");
+        for (var si in sites) {
+          let site = sites[si];
+          site = site.replace(/^\s+|\s+$/g, "");
+          background.steemCleanersSiteList.push(site);
+        }
       } catch (e) {
         console.error("[error]", e);
       }
     }
   },
+
+  updateSteemCleanersUserList: function(payload) {
+    if (payload) {
+      payload = payload.replace(/\n$/, "");
+      window.localStorage.setItem('steemCleanersUserList', payload);
+
+      try {
+        const users = payload.split("\n");
+        for (var ui in users) {
+          let user = users[ui];
+          user = user.replace(/^\s+|\s+$/g, "");
+          background.steemCleanersUserList.push(user);
+        }
+      } catch (e) {
+        console.error("[error]", e);
+      }
+    }
+  }
 };
 
 background.init();
