@@ -39,6 +39,7 @@ https://chrome.google.com/webstore/detail/steemed-phish/eiaigalhddmmpdnehcigmlmg
 ## v0.0.31
 - make comment blocks more visible as a work around the new strategy described here https://steemit.com/steemit/@arcange/be-careful-new-scam-for-phishing-website-uses-fake-comments-with-images
 - add support for steemcleaners steemit account blacklist https://github.com/gryter/plentyofphish/blob/master/phishing.txt and mark those authors if found on any steemit blogs
+- when hovering the mouse on an image, show a dotted border to help spot fake upvote/reply links
 
 ## v0.0.30
 - added steemcleaners blacklist https://github.com/gryter/plentyofphish/blob/master/phishingurls.txt
