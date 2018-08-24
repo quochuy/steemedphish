@@ -39,21 +39,23 @@ var contentScript = {
         contentScript.process.init();
         break;
 
+      // Short URL expanded
       case request.hasOwnProperty('longUrl'):
         if (request.longUrl !== '') {
-          // Short URL expanded, forwarding message to the injected script
-          console.log("Received long url", request.longUrl);
-
           var longUrl = request.longUrl;
-          var scamAnchorSelector = 'a[href="' + request.url + '"]';
+          var anchorId = btoa(longUrl);
+          var scamAnchorSelector = 'a[data-url="' + anchorId + '"]';
+          var scamAnchors = document.querySelectorAll(scamAnchorSelector);
 
-          var scamAnchor = document.querySelector(scamAnchorSelector);
-          if (scamAnchor) {
+          if (scamAnchors) {
+            for (var ai=0; ai<scamAnchors.length; ai++) {
+              var scamAnchor = scamAnchors[ai];
 
-            scamAnchor.href = request.longUrl;
-            scamAnchor.classList.add('steemed-phish-unshortened');
-            scamAnchor.classList.remove('steemed-phish-checked');
-            scamAnchor.classList.remove("steemed-phish-unshortening");
+              scamAnchor.href = longUrl;
+              scamAnchor.classList.add('steemed-phish-unshortened');
+              scamAnchor.classList.remove('steemed-phish-checked');
+              scamAnchor.classList.remove("steemed-phish-unshortening");
+            }
 
             contentScript.process.checkAnchors();
           }
@@ -279,6 +281,8 @@ var contentScript = {
     checkAnchors: function () {
       console.log('Steemed Phish: Checking anchors');
 
+      var urlRequestedForUnshortening = [];
+
       var host = window.location.host,
         anchors = document.querySelectorAll('.Post a[href]:not(.steemed-phish-checked)');
 
@@ -331,9 +335,15 @@ var contentScript = {
               && contentScript.process.isBypass(anchor.href) === false
               && !anchor.classList.contains('steemed-phish-unshortened')
             ) {
+              var anchorId = btoa(anchor.href);
               anchor.classList.add("steemed-phish-unshortening");
-              console.log("Unshorten", anchor.href);
-              chrome.extension.sendRequest({unshortenUrl: anchor.href});
+              anchor.dataset.url = anchorId;
+
+              // No need to unshorten the same URL more than once
+              if (urlRequestedForUnshortening.indexOf(anchorId) === -1) {
+                chrome.extension.sendRequest({unshortenUrl: anchor.href});
+                urlRequestedForUnshortening.push(anchorId);
+              }
             }
           }
         }
@@ -409,7 +419,6 @@ var contentScript = {
      * Initialize the scanning process
      */
     init: function () {
-      console.log("Content object init");
       if (contentScript.process.isBlacklisted(window.location.href)) {
         contentScript.process.displayScamWarning();
       } else if (contentScript.process.isWhitelisted(window.location.href)) {
