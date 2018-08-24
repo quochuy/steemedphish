@@ -312,7 +312,10 @@ var background = {
     }
   },
 
-  Update SteemCleaners user list and cache it in localStorage
+  /**
+   * Update SteemCleaners user list and cache it in localStorage
+   * @param payload
+   */
   updateSteemCleanersUserList: function(payload) {
     if (payload) {
       payload = payload.replace(/\n$/, "");
