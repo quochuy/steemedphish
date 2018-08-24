@@ -1,3 +1,7 @@
+/**
+ * Background process
+ * @type {{alertMessage: string, alertSuspiciousMessage: string, siteList: {whitelist: Array, blacklist: Array, suspicious: Array}, steemCleanersSiteList: Array, steemCleanersUserList: Array, alertDisplayed: boolean, init: background.init, unshortenUrl: background.unshortenUrl, requestListener: background.requestListener, updateIconColorByUrl: background.updateIconColorByUrl, isWhitelisted: background.isWhitelisted, isBlacklisted: background.isBlacklisted, isSuspicious: background.isSuspicious, fetchSiteList: background.fetchSiteList, fetchSteemCleanersSiteList: background.fetchSteemCleanersSiteList, fetchSteemCleanersUserList: background.fetchSteemCleanersUserList, updateSiteList: background.updateSiteList, updateSteemCleanersSiteList: background.updateSteemCleanersSiteList, updateSteemCleanersUserList: background.updateSteemCleanersUserList}}
+ */
 var background = {
   alertMessage: 'One of your browser tabs has landed on a Steemit SCAM website: ',
   alertSuspiciousMessage: 'One of your browser tabs has landed on a suspicious website. It is not a blacklisted website but looks suspicious. Be careful before using your Steemit keys: ',
@@ -13,6 +17,9 @@ var background = {
 
   alertDisplayed: false,
 
+  /**
+   * Initialization
+   */
   init: function () {
     background.fetchSiteList(background.updateSiteList);
     background.fetchSteemCleanersSiteList(background.updateSteemCleanersSiteList);
@@ -41,6 +48,11 @@ var background = {
     });
   },
 
+  /**
+   * Use our custom URL unshortener
+   * @param url
+   * @param callback
+   */
   unshortenUrl: function (url, callback) {
     var http = new XMLHttpRequest();
     http.open('GET', 'https://tools.steemulant.com/api/unshorten.php?url=' + encodeURIComponent(url));
@@ -52,6 +64,12 @@ var background = {
     http.send();
   },
 
+  /**
+   * Listening for messages from the content and popup scripts
+   * @param request
+   * @param sender
+   * @param sendResponse
+   */
   requestListener: function (request, sender, sendResponse) {
     // Only process request sent from the current tab
     chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
@@ -86,6 +104,11 @@ var background = {
     background.listening = false;
   },
 
+  /**
+   * Change our extension icon color to indicate the status of the current page
+   * @param url
+   * @param tabId
+   */
   updateIconColorByUrl: function (url, tabId) {
     var isWhitelisted = background.isWhitelisted(url);
     if (isWhitelisted) {
@@ -110,6 +133,11 @@ var background = {
     }
   },
 
+  /**
+   * Check whether the URL is whitelisted or not
+   * @param url
+   * @returns {boolean}
+   */
   isWhitelisted: function (url) {
     if (url.indexOf('http') === 0) {
       var baseUrl = url.split('/').slice(0, 3).join('/') + '/';
@@ -126,6 +154,11 @@ var background = {
     return false;
   },
 
+  /**
+   * Check whether the URL is blacklisted or not
+   * @param url
+   * @returns {boolean}
+   */
   isBlacklisted: function (url) {
     if (url.indexOf('http') === 0) {
       var baseUrl = url.split('/').slice(0, 3).join('/') + '/';
@@ -149,6 +182,11 @@ var background = {
     return false;
   },
 
+  /**
+   * Check whether the URL is suspiscious or not
+   * @param url
+   * @returns {boolean}
+   */
   isSuspicious: function (url) {
     for (var i = 0; i < background.siteList.suspicious.length; i++) {
       var entry = background.siteList.suspicious[i];
@@ -171,6 +209,10 @@ var background = {
     return false;
   },
 
+  /**
+   * Fetch our own whitelist/blacklist
+   * @param callback
+   */
   fetchSiteList: function (callback) {
     var http = new XMLHttpRequest();
     var now = new Date().getTime();
@@ -188,6 +230,10 @@ var background = {
     http.send();
   },
 
+  /**
+   * Fetch SteemCleaners site blacklist
+   * @param callback
+   */
   fetchSteemCleanersSiteList: function (callback) {
     var http = new XMLHttpRequest();
     var now = new Date().getTime();
@@ -206,6 +252,10 @@ var background = {
     http.send();
   },
 
+  /**
+   * Fetch SteemCleaners user blacklist
+   * @param callback
+   */
   fetchSteemCleanersUserList: function (callback) {
     var http = new XMLHttpRequest();
     var now = new Date().getTime();
@@ -224,6 +274,10 @@ var background = {
     http.send();
   },
 
+  /**
+   * Update our list and cache it in localStorage
+   * @param payload
+   */
   updateSiteList: function (payload) {
     if (payload) {
       window.localStorage.setItem('steemedPhishSiteList', payload);
@@ -236,6 +290,10 @@ var background = {
     }
   },
 
+  /**
+   * Update SteemCleaners list and cache it in localStorage
+   * @param payload
+   */
   updateSteemCleanersSiteList: function (payload) {
     if (payload) {
       payload = payload.replace(/\n$/, "");
@@ -254,6 +312,7 @@ var background = {
     }
   },
 
+  Update SteemCleaners user list and cache it in localStorage
   updateSteemCleanersUserList: function(payload) {
     if (payload) {
       payload = payload.replace(/\n$/, "");
