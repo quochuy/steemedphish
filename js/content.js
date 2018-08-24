@@ -2,7 +2,7 @@
  * Content script that will be run on the actual page
  * @type {{textarea: null, pageDataUpdateTimer: number, devtoolsPanelReady: boolean, init: contentScript.init, requestListener: contentScript.requestListener, process: {initialized: boolean, siteList: null, steemCleanersSiteList: null, steemCleanersUserList: null, observer: null, tooltip: null, observerConfig: {attributes: boolean, childList: boolean, subtree: boolean, characterData: boolean}, observerTimer: null, externalLinkTooltipText: string, suspiciousLinkTooltipText: string, blacklistLinkTooltipText: string, initObserver: contentScript.process.initObserver, goVoteForMe: contentScript.process.goVoteForMe, getAllTextNodes: (function(*=): Array), highlightBlacklistedUsers: contentScript.process.highlightBlacklistedUsers, isWhitelisted: contentScript.process.isWhitelisted, isBlacklisted: contentScript.process.isBlacklisted, isBypass: contentScript.process.isBypass, isSuspicious: contentScript.process.isSuspicious, checkAnchors: contentScript.process.checkAnchors, mousemoveHandler: contentScript.process.mousemoveHandler, mouseoutHandler: contentScript.process.mouseoutHandler, displayScamWarning: contentScript.process.displayScamWarning, init: contentScript.process.init}}}
  */
-var contentScript = {
+let contentScript = {
   textarea: null,
   pageDataUpdateTimer: 0,
   devtoolsPanelReady: false,
@@ -31,7 +31,7 @@ var contentScript = {
   requestListener: function (request, sender, sendResponse) {
     switch (true) {
       case request.hasOwnProperty('siteList'):
-        var script = document.createElement('script');
+        let script = document.createElement('script');
         contentScript.process.siteList = request.siteList;
         contentScript.process.steemCleanersSiteList = request.steemCleanersSiteList;
         contentScript.process.steemCleanersUserList = request.steemCleanersUserList;
@@ -42,14 +42,14 @@ var contentScript = {
       // Short URL expanded
       case request.hasOwnProperty('longUrl'):
         if (request.longUrl !== '') {
-          var longUrl = request.longUrl;
-          var anchorId = btoa(longUrl);
-          var scamAnchorSelector = 'a[data-url="' + anchorId + '"]';
-          var scamAnchors = document.querySelectorAll(scamAnchorSelector);
+          let longUrl = request.longUrl;
+          let anchorId = btoa(longUrl);
+          let scamAnchorSelector = 'a[data-url="' + anchorId + '"]';
+          let scamAnchors = document.querySelectorAll(scamAnchorSelector);
 
           if (scamAnchors) {
-            for (var ai=0; ai<scamAnchors.length; ai++) {
-              var scamAnchor = scamAnchors[ai];
+            for (let ai = 0; ai < scamAnchors.length; ai++) {
+              let scamAnchor = scamAnchors[ai];
 
               scamAnchor.href = longUrl;
               scamAnchor.classList.add('steemed-phish-unshortened');
@@ -90,7 +90,7 @@ var contentScript = {
      * Initializing the MutationObserver to support pages with lazy-loading
      */
     initObserver: function () {
-      var body = document.body;
+      let body = document.body;
 
       // Using a MutationObserver to wait for a DOM change
       // This is to scan dynamically loaded content (lazyload of comments for example)
@@ -123,9 +123,9 @@ var contentScript = {
      */
     goVoteForMe: function () {
       if (window.location.href.indexOf('https://steemit.com/~witnesses#votefor=quochuy') !== -1) {
-        var buttons = document.evaluate("//button[contains(., 'Vote')]", document, null, XPathResult.ANY_TYPE, null);
+        let buttons = document.evaluate("//button[contains(., 'Vote')]", document, null, XPathResult.ANY_TYPE, null);
         if (buttons) {
-          var voteButton = buttons.iterateNext(),
+          let voteButton = buttons.iterateNext(),
             voteField = voteButton.parentElement.parentElement.querySelector('input');
 
           voteField.value = 'quochuy';
@@ -142,14 +142,14 @@ var contentScript = {
      * @param startNode
      * @returns {Array}
      */
-    getAllTextNodes: function(startNode) {
-      var result = [];
+    getAllTextNodes: function (startNode) {
+      let result = [];
 
-      (function scanSubTree(node){
-        if(node.childNodes.length)
-          for(var i = 0; i < node.childNodes.length; i++)
+      (function scanSubTree(node) {
+        if (node.childNodes.length)
+          for (let i = 0; i < node.childNodes.length; i++)
             scanSubTree(node.childNodes[i]);
-        else if(node.nodeType == Node.TEXT_NODE)
+        else if (node.nodeType === Node.TEXT_NODE)
           result.push(node);
       })(startNode);
 
@@ -159,15 +159,15 @@ var contentScript = {
     /**
      * Find blacklisted users and highlight them
      */
-    highlightBlacklistedUsers: function() {
-      var authorNodes = document.getElementsByClassName('Author');
+    highlightBlacklistedUsers: function () {
+      let authorNodes = document.getElementsByClassName('Author');
 
-      var regexp = new RegExp("\\b(" + contentScript.process.steemCleanersUserList.join('|') + ")\\b", 'g');
+      let regexp = new RegExp("\\b(" + contentScript.process.steemCleanersUserList.join('|') + ")\\b", 'g');
 
-      for (var ni=0; ni<authorNodes.length; ni++) {
-        var node = authorNodes[ni];
+      for (let ni = 0; ni < authorNodes.length; ni++) {
+        let node = authorNodes[ni];
 
-        contentScript.process.getAllTextNodes(node).forEach(function(node) {
+        contentScript.process.getAllTextNodes(node).forEach(function (node) {
           if (node.nodeValue.length > 2 && node.nodeValue.indexOf("⚠️") === -1) {
             node.nodeValue = node.nodeValue.replace(
               regexp,
@@ -185,11 +185,11 @@ var contentScript = {
      */
     isWhitelisted: function (url) {
       if (url.indexOf('http') === 0) {
-        var baseUrl = url.split('/').slice(0, 3).join('/') + '/';
+        let baseUrl = url.split('/').slice(0, 3).join('/') + '/';
 
-        for (var i = 0; i < contentScript.process.siteList.whitelist.length; i++) {
-          var entry = contentScript.process.siteList.whitelist[i];
-          var regexp = new RegExp(entry, 'gi');
+        for (let i = 0; i < contentScript.process.siteList.whitelist.length; i++) {
+          let entry = contentScript.process.siteList.whitelist[i];
+          let regexp = new RegExp(entry, 'gi');
           if (baseUrl.match(regexp)) {
             return true;
           }
@@ -206,18 +206,18 @@ var contentScript = {
      */
     isBlacklisted: function (url) {
       if (url.indexOf('http') === 0) {
-        var baseUrl = url.split('/').slice(0, 3).join('/') + '/';
+        let baseUrl = url.split('/').slice(0, 3).join('/') + '/';
 
-        for (var i = 0; i < contentScript.process.siteList.blacklist.length; i++) {
-          var entry = contentScript.process.siteList.blacklist[i];
-          var regexp = new RegExp(entry, 'gi');
+        for (let i = 0; i < contentScript.process.siteList.blacklist.length; i++) {
+          let entry = contentScript.process.siteList.blacklist[i];
+          let regexp = new RegExp(entry, 'gi');
           if (baseUrl.match(regexp)) {
             return true;
           }
         }
 
-        for (var i = 0; i < contentScript.process.steemCleanersSiteList.length; i++) {
-          var entry = contentScript.process.steemCleanersSiteList[i];
+        for (let i = 0; i < contentScript.process.steemCleanersSiteList.length; i++) {
+          let entry = contentScript.process.steemCleanersSiteList[i];
           if (entry !== '' && baseUrl.indexOf(entry) !== -1) {
             return true;
           }
@@ -234,11 +234,11 @@ var contentScript = {
      */
     isBypass: function (url) {
       if (url.indexOf('http') === 0) {
-        var baseUrl = url.split('/').slice(0, 3).join('/') + '/';
+        let baseUrl = url.split('/').slice(0, 3).join('/') + '/';
 
-        for (var i = 0; i < contentScript.process.siteList.bypass.length; i++) {
-          var entry = contentScript.process.siteList.bypass[i];
-          var regexp = new RegExp(entry, 'gi');
+        for (let i = 0; i < contentScript.process.siteList.bypass.length; i++) {
+          let entry = contentScript.process.siteList.bypass[i];
+          let regexp = new RegExp(entry, 'gi');
           if (baseUrl.match(regexp)) {
             return true;
           }
@@ -254,12 +254,12 @@ var contentScript = {
      * @returns {boolean}
      */
     isSuspicious: function (url) {
-      for (var i = 0; i < contentScript.process.siteList.suspicious.length; i++) {
-        var entry = contentScript.process.siteList.suspicious[i];
-        var regexp = new RegExp(entry.regexp, entry.modifier);
+      for (let i = 0; i < contentScript.process.siteList.suspicious.length; i++) {
+        let entry = contentScript.process.siteList.suspicious[i];
+        let regexp = new RegExp(entry.regexp, entry.modifier);
 
         if (url.match(regexp)) {
-          var hostname = url.split('/')[2];
+          let hostname = url.split('/')[2];
 
           // If the hostname are IP addresses then don't warn if it is a private IP range
           if (
@@ -281,13 +281,13 @@ var contentScript = {
     checkAnchors: function () {
       console.log('Steemed Phish: Checking anchors');
 
-      var urlRequestedForUnshortening = [];
+      let urlRequestedForUnshortening = [];
 
-      var host = window.location.host,
+      let host = window.location.host,
         anchors = document.querySelectorAll('.Post a[href]:not(.steemed-phish-checked)');
 
-      for (var i = 0; i < anchors.length; i++) {
-        var anchor = anchors[i];
+      for (let i = 0; i < anchors.length; i++) {
+        let anchor = anchors[i];
 
         if (
           anchor.href             // If the anchor has a HREF attribute
@@ -335,7 +335,7 @@ var contentScript = {
               && contentScript.process.isBypass(anchor.href) === false
               && !anchor.classList.contains('steemed-phish-unshortened')
             ) {
-              var anchorId = btoa(anchor.href);
+              let anchorId = btoa(anchor.href);
               anchor.classList.add("steemed-phish-unshortening");
               anchor.dataset.url = anchorId;
 
@@ -357,8 +357,8 @@ var contentScript = {
      * @param e
      */
     mousemoveHandler: function (e) {
-      var target = e.target;
-      var tooltip = document.querySelector('#external-link-tooltip');
+      let target = e.target;
+      let tooltip = document.querySelector('#external-link-tooltip');
 
       if (target.classList.contains('steemed-phish-suspicious')) {
         tooltip.innerHTML = contentScript.process.suspiciousLinkTooltipText;
@@ -380,7 +380,7 @@ var contentScript = {
      * @param e
      */
     mouseoutHandler: function (e) {
-      var tooltip = document.querySelector('#external-link-tooltip');
+      let tooltip = document.querySelector('#external-link-tooltip');
       if (tooltip) {
         tooltip.style.display = "none";
       }
@@ -390,7 +390,7 @@ var contentScript = {
      * Display a full-page warning if the user landed on a phishing website
      */
     displayScamWarning: function () {
-      var div = document.createElement('div');
+      let div = document.createElement('div');
       div.id = "steemedphishwarning";
       div.innerHTML = '<div><h2>STEEMED PHISH WARNING</h2>' +
         '<p>This site is known to be stealing username and password from Steemit users.</p>' +
@@ -426,7 +426,7 @@ var contentScript = {
         contentScript.process.goVoteForMe();
 
         // Inject the tooltip container
-        var span = document.createElement('span');
+        let span = document.createElement('span');
         span.id = "external-link-tooltip";
         span.innerHTML = contentScript.process.externalLinkTooltipText;
         document.body.appendChild(span);
@@ -438,6 +438,6 @@ var contentScript = {
       }
     }
   }
-}
+};
 
 contentScript.init();
