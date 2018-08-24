@@ -61,7 +61,7 @@ var background = {
       if (typeof activeTab !== "undefined" && activeTab.hasOwnProperty('id')) {
         var activeTabId = activeTab.id; // or do whatever you need
 
-        if (activeTabId && activeTabId == sender.tab.id) {
+        if (activeTabId && activeTabId === sender.tab.id) {
           switch (true) {
             case request.hasOwnProperty('getSiteLists'):
               chrome.tabs.sendRequest(activeTabId, {
