@@ -31,7 +31,6 @@ var contentScript = {
           // Short URL expanded, forwarding message to the injected script
           console.log("Received long url", request.longUrl);
 
-
           var longUrl = request.longUrl;
           var scamAnchorSelector = 'a[href="' + request.url + '"]';
 
@@ -280,7 +279,6 @@ var contentScript = {
               && !anchor.classList.contains('steemed-phish-unshortened')
             ) {
               anchor.classList.add("steemed-phish-unshortening");
-              //window.postMessage({unshortenUrl: anchor.href}, '*');
               console.log("Unshorten", anchor.href);
               chrome.extension.sendRequest({unshortenUrl: anchor.href});
             }
@@ -350,9 +348,6 @@ var contentScript = {
       } else if (contentScript.process.isWhitelisted(window.location.href)) {
         contentScript.process.initObserver();
         contentScript.process.goVoteForMe();
-
-        // Listening to messages comming from contentScript
-        window.addEventListener('message', contentScript.process.messageListener);
 
         // Inject the tooltip container
         var span = document.createElement('span');
