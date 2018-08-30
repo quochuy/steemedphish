@@ -39,6 +39,7 @@ https://chrome.google.com/webstore/detail/steemed-phish/eiaigalhddmmpdnehcigmlmg
 ## v0.0.32
 - code cleanup and optimisation
 - fix issue with some links not being scanned properly
+- if the same external URL is used multiple times on the same page, don't unshorten it multiple times
 
 ## v0.0.31
 - make comment blocks more visible as a work around the new strategy described here https://steemit.com/steemit/@arcange/be-careful-new-scam-for-phishing-website-uses-fake-comments-with-images
